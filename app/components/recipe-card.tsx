@@ -2,6 +2,9 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, type ViewStyle } from 
 import { Clock, Flame, BookBookmark, Bookmark, Star } from "phosphor-react-native"
 import type { Recipe } from "@/types/recipe"
 import { images } from "@/constants/images"
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/app/_layout"; // adjust if in separate file
 
 interface RecipeCardProps {
   recipe: Recipe
@@ -28,15 +31,20 @@ export default function RecipeCard({ recipe, style, layout = "list" }: RecipeCar
   }
 
   const dietTintColor = {
-  vegan: '#4CAF50',        // Green — symbolizes plants, sustainability
-  vegetarian: '#8BC34A',   // Light green — similar to vegan, but a bit softer
-  glutenFree: '#FF9800',   // Orange — often used in allergy/warning contexts
-  dairyFree: '#03A9F4',    // Blue — clean, cool, non-dairy feel
-  meat: '#a73520',  // Teal — evokes the ocean and fish
-};
+    vegan: '#4CAF50',        // Green — symbolizes plants, sustainability
+    vegetarian: '#8BC34A',   // Light green — similar to vegan, but a bit softer
+    glutenFree: '#FF9800',   // Orange — often used in allergy/warning contexts
+    dairyFree: '#03A9F4',    // Blue — clean, cool, non-dairy feel
+    meat: '#a73520',  // Teal — evokes the ocean and fish
+  };
+
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
-    <TouchableOpacity style={[styles.container, isListLayout ? styles.listContainer : styles.gridContainer, style]}>
+    <TouchableOpacity 
+      style={[styles.container, isListLayout ? styles.listContainer : styles.gridContainer, style]} 
+      onPress={() => navigation.navigate("RecipeDetail", { recipe })}
+    >
       <View style={isListLayout ? styles.listContent : styles.gridContent}>
         
         <Image source={{ uri: recipe.image }} style={isListLayout ? styles.listImage : styles.gridImage} />
@@ -55,8 +63,7 @@ export default function RecipeCard({ recipe, style, layout = "list" }: RecipeCar
           </Text>
 
           <View style={styles.dishTypeContainer}>
-            <Text style={styles.dishType}>{recipe.dishTypes[2]}</Text>
-            <Text style={styles.dishType}>{recipe.dishTypes[1]}</Text>
+            <Text style={styles.dishType}>{recipe.dishTypes[0]}</Text>
           </View>
 
           <Text style={styles.readyInText}>
