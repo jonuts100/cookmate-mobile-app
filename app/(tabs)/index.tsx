@@ -34,7 +34,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Recently Viewed</Text>
             <TouchableOpacity style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See All</Text>
-              <CaretCircleDoubleRight size={16} color="#FF6B6B" />
+              <CaretCircleDoubleRight size={16} color="#095d40" />
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
@@ -50,7 +50,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Recommended For You</Text>
             <TouchableOpacity style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See All</Text>
-              <CaretCircleDoubleRight size={16} color="#FF6B6B" />
+              <CaretCircleDoubleRight size={16} color="#095d40" />
             </TouchableOpacity>
           </View>
           <View style={styles.recommendationsGrid}>
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   generateButton: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#095d40",
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     fontSize: 14,
-    color: "#FF6B6B",
+    color: "#095d40",
     marginRight: 4,
   },
   horizontalScroll: {
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   readMoreText: {
-    color: "#FF6B6B",
+    color: "#095d40",
     fontWeight: "500",
     fontSize: 13,
   },

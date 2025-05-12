@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, type ViewStyle } from "react-native"
-import { Clock, Flame, BookBookmark, Star } from "phosphor-react-native"
+import { Clock, Flame, BookBookmark, Bookmark, Star } from "phosphor-react-native"
 import type { Recipe } from "@/types/recipe"
+import { images } from "@/constants/images"
 
 interface RecipeCardProps {
   recipe: Recipe
@@ -8,48 +9,113 @@ interface RecipeCardProps {
   layout?: "grid" | "list"
 }
 
-export default function RecipeCard({ recipe, style, layout = "grid" }: RecipeCardProps) {
+export default function RecipeCard({ recipe, style, layout = "list" }: RecipeCardProps) {
   const isListLayout = layout === "list"
+  const nutrientColors = {
+    Calories: '#FFB74D',       // Orange
+    Protein: '#81C784',        // Green
+    Fat: '#E57373',            // Red
+    Carbohydrates: '#64B5F6',  // Blue
+  };
+
+  const dietIcons = {
+    vegan: images.vegan,
+    vegetarian: images.vegetarian,
+    glutenFree: images.glutenFree,
+    dairyFree: images.dairyFree,
+    pescatarian: images.meat,
+    
+  }
+
+  const dietTintColor = {
+  vegan: '#4CAF50',        // Green — symbolizes plants, sustainability
+  vegetarian: '#8BC34A',   // Light green — similar to vegan, but a bit softer
+  glutenFree: '#FF9800',   // Orange — often used in allergy/warning contexts
+  dairyFree: '#03A9F4',    // Blue — clean, cool, non-dairy feel
+  meat: '#a73520',  // Teal — evokes the ocean and fish
+};
 
   return (
     <TouchableOpacity style={[styles.container, isListLayout ? styles.listContainer : styles.gridContainer, style]}>
       <View style={isListLayout ? styles.listContent : styles.gridContent}>
-        <Image source={{ uri: recipe.imageUrl }} style={isListLayout ? styles.listImage : styles.gridImage} />
+        
+        <Image source={{ uri: recipe.image }} style={isListLayout ? styles.listImage : styles.gridImage} />
 
         <View style={isListLayout ? styles.listDetails : styles.gridDetails}>
           <View style={styles.categoryContainer}>
-            <Text style={styles.category}>{recipe.category}</Text>
+            {recipe.glutenFree ? <Image source={dietIcons.glutenFree} style={styles.dietIcon} tintColor={dietTintColor.glutenFree}/> : null}
+            {recipe.vegan ? <Image source={dietIcons.vegan} style={styles.dietIcon} tintColor={dietTintColor.vegan}/> : <Image source={images.meat} style={styles.dietIcon} tintColor={dietTintColor.meat}></Image>}
+            {recipe.vegetarian ? <Image source={dietIcons.vegetarian} style={styles.dietIcon} tintColor={dietTintColor.vegetarian}/> : null}
+            {recipe.dairyFree ? <Image source={dietIcons.dairyFree} style={styles.dietIcon} tintColor={dietTintColor.dairyFree}/> : null}
+            
           </View>
 
           <Text style={[styles.title, isListLayout && styles.listTitle]} numberOfLines={1}>
             {recipe.title}
           </Text>
 
-          <View style={styles.metaContainer}>
-            <View style={styles.metaItem}>
-              <Clock size={14} color="#888" />
-              <Text style={styles.metaText}>{recipe.cookTime} min</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Flame size={14} color="#888" />
-              <Text style={styles.metaText}>{recipe.calories} cal</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Star size={14} color="#FFB800" />
-              <Text style={styles.metaText}>{recipe.rating}</Text>
-            </View>
+          <View style={styles.dishTypeContainer}>
+            <Text style={styles.dishType}>{recipe.dishTypes[2]}</Text>
+            <Text style={styles.dishType}>{recipe.dishTypes[1]}</Text>
           </View>
 
-          {isListLayout && (
-            <Text style={styles.description} numberOfLines={2}>
-              {recipe.description}
-            </Text>
-          )}
+          <Text style={styles.readyInText}>
+           Ready in {recipe.readyInMinutes} minutes
+          </Text>
+
+          <View style={styles.metaGridContainer}>
+            {recipe.nutrition.nutrients
+            .filter(nutrient =>
+              ["Calories", "Protein", "Fat", "Carbohydrates"].includes(nutrient.name)
+            )
+            .map((nutrient, index) => (
+              <View key={index} style={styles.metaGridItem}>
+                {nutrient.name === "Calories" && (
+                  <>
+                    <Image source={images.calorie}  style={styles.imageStyle} tintColor={nutrientColors[nutrient.name]} />
+                    <Text style={styles.metaText}>
+                      {nutrient.amount.toFixed(0)} {nutrient.unit}
+                    </Text>
+                  </>
+                )}
+                {nutrient.name === "Protein" && (
+                  <>
+                    <Image source={images.protein}  style={styles.imageStyle} tintColor={nutrientColors[nutrient.name]}/>
+                    <Text style={styles.metaText}>
+                      {nutrient.amount.toFixed(0)} {nutrient.unit}
+                    </Text>
+                  </>
+                )}
+                {nutrient.name === "Fat" && (
+                  <>
+                    <Image source={images.lipids} style={styles.imageStyle} tintColor={nutrientColors[nutrient.name]}/>
+                    <Text style={styles.metaText}>
+                      {nutrient.amount.toFixed(0)} {nutrient.unit}
+                    </Text>
+                  </>
+                )}
+                {nutrient.name === "Carbohydrates" && (
+                  <>
+                    <Image source={images.carbs}  style={styles.imageStyle} tintColor={nutrientColors[nutrient.name]}/>
+                    <Text style={styles.metaText}>
+                      {nutrient.amount.toFixed(0)} {nutrient.unit}
+                    </Text>
+                  </>
+                )}
+              </View>
+            ))}
+          </View>
+
+         
+          
+
         </View>
+
+
       </View>
 
       <TouchableOpacity style={styles.bookmarkButton}>
-        <BookBookmark size={18} color="#FF6B6B" />
+        <Bookmark size={18} color="#309bae" />
       </TouchableOpacity>
     </TouchableOpacity>
   )
@@ -64,14 +130,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 0.05,
+    elevation: 0.1,
     position: "relative",
+    borderWidth: 1,
+    borderColor: "#cbc7b7"
   },
   gridContainer: {
-    height: 230,
+    height: 300,
   },
   listContainer: {
-    height: 130,
+    height: 150,
   },
   gridContent: {
     flex: 1,
@@ -81,11 +149,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   gridImage: {
-    height: 100,
+    height: 140,
     width: "100%",
   },
   listImage: {
-    width: 120,
+    width: 150,
     height: "100%",
   },
   gridDetails: {
@@ -96,23 +164,47 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   categoryContainer: {
-    backgroundColor: "#F0F0F0",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    flexDirection: "row",
+
+    paddingHorizontal: 2,
+    paddingVertical: 2,
+    
     alignSelf: "flex-start",
-    marginBottom: 6,
+
+    marginBottom: 4,
   },
   category: {
+    borderRadius: 4,
     fontSize: 10,
-    color: "#666",
+    backgroundColor: "#F0F0F0",
+    color: "#222",
     fontWeight: "500",
+    marginRight: 4,
+  },
+  dishTypeContainer: {
+    flexDirection: "row",
+
+    paddingHorizontal: 2,
+    paddingVertical: 2,
+    
+    alignSelf: "flex-start",
+
+  },
+  dishType: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    fontSize: 10,
+    backgroundColor: "#f3f3f5",
+    color: "#232d14",
+    fontWeight: "700",
+    marginRight: 4,
   },
   title: {
     fontSize: 14,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 8,
+    marginBottom: 4,
   },
   listTitle: {
     fontSize: 16,
@@ -120,6 +212,28 @@ const styles = StyleSheet.create({
   metaContainer: {
     flexDirection: "column",
     alignItems: "flex-start",
+    justifyContent: "space-between",
+  },
+  metaRowContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginRight:4,
+    marginBottom:4
+  },
+  metaGridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginRight: 2,
+    marginBottom: 2,
+  },
+  metaGridItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    width: "50%", // ~50% minus margins/gaps
+    aspectRatio: 1, // Makes it square
+    marginBottom: 0, // space between rows
+    backgroundColor: "", // just for visualization
   },
   metaItem: {
     flexDirection: "row",
@@ -139,18 +253,33 @@ const styles = StyleSheet.create({
   },
   bookmarkButton: {
     position: "absolute",
-    top: 8,
+    top: 6,
     right: 8,
     backgroundColor: "#FFF",
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 4,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 0,
+  },
+  imageStyle: {
+    overflow: "hidden",
+    width: 14,
+    height: 14,
+  },
+  dietIcon: {
+    width: 14,
+    height: 14,
+  },
+  readyInText: {
+    fontSize: 12,
+    color: "#232d14",
+    marginVertical: 4,
+    
   },
 })

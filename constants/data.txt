@@ -1,31 +1,5 @@
-import type { Recipe } from "../types/recipe"
-
-export const cuisineOptions = [
-  'African', 'Asian', 'American', 'British', 'Cajun', 'Caribbean',
-  'Chinese', 'Eastern European', 'European', 'French', 'German',
-  'Greek', 'Indian', 'Irish', 'Italian', 'Japanese', 'Jewish',
-  'Korean', 'Latin American', 'Mediterranean', 'Mexican',
-  'Middle Eastern', 'Nordic', 'Southern', 'Spanish', 'Thai',
-  'Vietnamese'
-];
-
-export const dishTypeOptions = [
-  'main course', 'side dish', 'dessert', 'appetizer', 'salad',
-  'bread', 'breakfast', 'soup', 'beverage', 'sauce',
-  'marinade', 'fingerfood', 'snack', 'drink'
-];
-
-export const intoleranceOptions = [
-  'Dairy', 'Egg', 'Gluten', 'Grain', 'Peanut', 'Seafood', 'Sesame',
-  'Shellfish', 'Soy', 'Sulfite', 'Tree Nut', 'Wheat'
-];
-
-export const dietOptions = [
-  "Gluten Free", "Ketogenic", "Vegetarian", "Lacto-Vegetarian", "Ovo-Vegetarian", "Vegan", "Pescetarian", "Paleo", "Primal", "Low FODMAP", "Whole30"
-]
-
-export const mockRecipes: Recipe[] = [
-  
+{
+    "results": [
         {
             "id": 715769,
             "image": "https://img.spoonacular.com/recipes/715769-312x231.jpg",
@@ -54,7 +28,6 @@ export const mockRecipes: Recipe[] = [
             "sourceName": "pickfreshfoods.com",
             "pricePerServing": 414.24,
             "nutrition": {
-
                 "nutrients": [
                     {
                         "name": "Calories",
@@ -1889,7 +1862,6 @@ export const mockRecipes: Recipe[] = [
                         ]
                     }
                 ],
-
                 "caloricBreakdown": {
                     "percentProtein": 12.36,
                     "percentFat": 43.01,
@@ -32921,5 +32893,8 @@ export const mockRecipes: Recipe[] = [
             "spoonacularScore": 91.52754211425781,
             "spoonacularSourceUrl": "https://spoonacular.com/osso-buco-654125"
         }
-    
-]
+    ],
+    "offset": 0,
+    "number": 10,
+    "totalResults": 270
+}

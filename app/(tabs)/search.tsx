@@ -1,34 +1,27 @@
 "use client"
 
 import { useState } from "react"
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, FlatList } from "react-native"
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { MagnifyingGlass, SlidersHorizontal, X } from "phosphor-react-native"
 import RecipeCard from "../components/recipe-card"
 import { mockRecipes } from "@/constants/data"
-
-const filterCategories = [
-  { id: "cuisine", name: "Cuisine", options: ["Italian", "Mexican", "Asian", "Indian", "American"] },
-  { id: "diet", name: "Diet", options: ["Vegetarian", "Vegan", "Gluten-Free", "Keto", "Paleo"] },
-  { id: "meal", name: "Meal Type", options: ["Breakfast", "Lunch", "Dinner", "Snack", "Dessert"] },
-  { id: "time", name: "Cook Time", options: ["< 15 min", "15-30 min", "30-60 min", "> 60 min"] },
-]
+import { useRouter } from "expo-router"
 
 export default function SearchScreen() {
-  const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
-  const [activeFilters, setActiveFilters] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const router = useRouter()
 
-  const toggleFilter = (filter: string) => {
-    if (activeFilters.includes(filter)) {
-      setActiveFilters(activeFilters.filter((f) => f !== filter))
-    } else {
-      setActiveFilters([...activeFilters, filter])
-    }
-  }
+  // Filter recipes based on search query
+  const filteredRecipes = searchQuery.trim() 
+    ? mockRecipes.filter(recipe => 
+        recipe.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    : mockRecipes
 
-  const clearFilters = () => {
-    setActiveFilters([])
+  // Clear search query
+  const clearSearch = () => {
+    setSearchQuery('')
   }
 
   return (
@@ -44,79 +37,36 @@ export default function SearchScreen() {
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <TouchableOpacity onPress={clearSearch}>
               <X size={18} color="#666" />
             </TouchableOpacity>
           )}
         </View>
-        <TouchableOpacity style={styles.filterButton} onPress={() => setShowFilters(!showFilters)}>
+        <TouchableOpacity 
+          style={styles.filterButton} 
+          onPress={() => setShowFilters(!showFilters)}
+        >
           <SlidersHorizontal size={20} color={showFilters ? "#FF6B6B" : "#666"} />
         </TouchableOpacity>
       </View>
-
-      {/* Filters Section */}
-      {showFilters && (
-        <View style={styles.filtersContainer}>
-          <View style={styles.filtersHeader}>
-            <Text style={styles.filtersTitle}>Filters</Text>
-            {activeFilters.length > 0 && (
-              <TouchableOpacity onPress={clearFilters}>
-                <Text style={styles.clearFiltersText}>Clear all</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.activeFiltersContainer}>
-            {activeFilters.map((filter) => (
-              <TouchableOpacity key={filter} style={styles.activeFilterChip} onPress={() => toggleFilter(filter)}>
-                <Text style={styles.activeFilterText}>{filter}</Text>
-                <X size={14} color="#FFF" />
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          <ScrollView style={styles.filterCategoriesContainer}>
-            {filterCategories.map((category) => (
-              <View key={category.id} style={styles.filterCategory}>
-                <Text style={styles.filterCategoryTitle}>{category.name}</Text>
-                <View style={styles.filterOptionsContainer}>
-                  {category.options.map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[styles.filterOptionChip, activeFilters.includes(option) && styles.filterOptionChipActive]}
-                      onPress={() => toggleFilter(option)}
-                    >
-                      <Text
-                        style={[
-                          styles.filterOptionText,
-                          activeFilters.includes(option) && styles.filterOptionTextActive,
-                        ]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-      )}
 
       {/* Search Results */}
       <View style={styles.resultsContainer}>
         {searchQuery ? (
           <Text style={styles.resultsTitle}>Results for {searchQuery}</Text>
         ) : (
-          <Text style={styles.resultsTitle}>Popular Recipes</Text>
+          <Text style={styles.resultsTitle}>All Recipes</Text>
         )}
 
         <FlatList
-          data={mockRecipes}
+          data={filteredRecipes}
           keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <RecipeCard recipe={item} style={styles.resultCard} />}
+          renderItem={({ item }) => (
+            <RecipeCard recipe={item} style={styles.resultCard} />
+          )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.resultsGrid}
+          numColumns={1}
         />
       </View>
     </SafeAreaView>
@@ -162,81 +112,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
     justifyContent: "center",
     alignItems: "center",
-  },
-  filtersContainer: {
-    backgroundColor: "#FFF",
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EFEFEF",
-  },
-  filtersHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 12,
-  },
-  filtersTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
-  clearFiltersText: {
-    fontSize: 14,
-    color: "#FF6B6B",
-  },
-  activeFiltersContainer: {
-    flexDirection: "row",
-    marginBottom: 12,
-  },
-  activeFilterChip: {
-    backgroundColor: "#FF6B6B",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 8,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  activeFilterText: {
-    color: "#FFF",
-    marginRight: 6,
-    fontSize: 13,
-  },
-  filterCategoriesContainer: {
-    maxHeight: 300,
-  },
-  filterCategory: {
-    marginBottom: 16,
-  },
-  filterCategoryTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#333",
-  },
-  filterOptionsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  filterOptionChip: {
-    backgroundColor: "#F0F0F0",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  filterOptionChipActive: {
-    backgroundColor: "#FFE0E0",
-  },
-  filterOptionText: {
-    color: "#666",
-    fontSize: 13,
-  },
-  filterOptionTextActive: {
-    color: "#FF6B6B",
-    fontWeight: "500",
   },
   resultsContainer: {
     flex: 1,
