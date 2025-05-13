@@ -20,8 +20,6 @@ import type { RootStackParamList } from "@/app/_layout";
 
 type RecipeDetailRouteProp = RouteProp<RootStackParamList, "RecipeDetail">;
 
-
-
 const RecipeDetailScreen = () => {
   const route = useRoute<RecipeDetailRouteProp>();
   const { recipe } = route.params;

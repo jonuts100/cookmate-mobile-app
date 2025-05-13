@@ -17,7 +17,7 @@ export default function ProfileScreen() {
           <Text style={styles.profileName}>Jessica Wilson</Text>
           <Text style={styles.profileEmail}>jessica.wilson@example.com</Text>
           <View style={styles.tierBadge}>
-            <Heart size={14} color="#095d40" />
+            <Heart size={14} color="#FF6B6B" />
             <Text style={styles.tierText}>Premium Member</Text>
           </View>
           <TouchableOpacity style={styles.editProfileButton}>
@@ -31,7 +31,7 @@ export default function ProfileScreen() {
           <View style={styles.settingsContainer}>
             <TouchableOpacity style={styles.settingItem}>
               <View style={styles.settingIconContainer}>
-                <User size={20} color="#095d40" />
+                <User size={20} color="#FF6B6B" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Personal Information</Text>
@@ -42,7 +42,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity style={styles.settingItem}>
               <View style={styles.settingIconContainer}>
-                <Bell size={20} color="#095d40" />
+                <Bell size={20} color="#FF6B6B" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Notifications</Text>
@@ -53,7 +53,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity style={styles.settingItem}>
               <View style={styles.settingIconContainer}>
-                <CreditCard size={20} color="#095d40" />
+                <CreditCard size={20} color="#FF6B6B" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Subscription</Text>
@@ -70,18 +70,18 @@ export default function ProfileScreen() {
           <View style={styles.settingsContainer}>
             <View style={styles.settingItem}>
               <View style={styles.settingIconContainer}>
-                <Gear size={20} color="#095d40" />
+                <Gear size={20} color="#FF6B6B" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Dark Mode</Text>
                 <Text style={styles.settingDescription}>Toggle dark theme</Text>
               </View>
-              <Switch trackColor={{ false: "#E0E0E0", true: "#FFB6B6" }} thumbColor={"#095d40"} value={false} />
+              <Switch trackColor={{ false: "#E0E0E0", true: "#FFB6B6" }} thumbColor={"#FF6B6B"} value={false} />
             </View>
 
             <TouchableOpacity style={styles.settingItem}>
               <View style={styles.settingIconContainer}>
-                <Gear size={20} color="#095d40" />
+                <Gear size={20} color="#FF6B6B" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Dietary Preferences</Text>
@@ -98,7 +98,7 @@ export default function ProfileScreen() {
           <View style={styles.settingsContainer}>
             <TouchableOpacity style={styles.settingItem}>
               <View style={styles.settingIconContainer}>
-                <Question size={20} color="#095d40" />
+                <Question size={20} color="#FF6B6B" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Help & Support</Text>
@@ -109,7 +109,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity style={styles.settingItem}>
               <View style={styles.settingIconContainer}>
-                <Shield size={20} color="#095d40" />
+                <Shield size={20} color="#FF6B6B" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Terms & Conditions</Text>
@@ -120,7 +120,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity style={styles.settingItem}>
               <View style={styles.settingIconContainer}>
-                <Shield size={20} color="#095d40" />
+                <Shield size={20} color="#FF6B6B" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Privacy Policy</Text>
@@ -133,7 +133,7 @@ export default function ProfileScreen() {
 
         {/* Logout */}
         <TouchableOpacity style={styles.logoutButton}>
-          <SignOut size={20} color="#095d40" />
+          <SignOut size={20} color="#FF6B6B" />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
 
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#095d40",
+    backgroundColor: "#FF6B6B",
     width: 32,
     height: 32,
     borderRadius: 16,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   tierText: {
     fontSize: 12,
-    color: "#095d40",
+    color: "#FF6B6B",
     fontWeight: "600",
     marginLeft: 4,
   },
@@ -210,11 +210,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "#095d40",
+    borderColor: "#FF6B6B",
     borderRadius: 8,
   },
   editProfileText: {
-    color: "#095d40",
+    color: "#FF6B6B",
     fontWeight: "500",
   },
   section: {
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     fontWeight: "500",
-    color: "#095d40",
+    color: "#FF6B6B",
   },
   versionContainer: {
     alignItems: "center",

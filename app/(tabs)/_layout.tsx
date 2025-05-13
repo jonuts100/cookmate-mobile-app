@@ -19,7 +19,7 @@ export default function App() {
         <StatusBar style="auto" />
         <Tab.Navigator
           screenOptions={{
-            tabBarActiveTintColor: '#095d40',
+            tabBarActiveTintColor: '#FF6B6B',
             tabBarInactiveTintColor: '#888',
             tabBarStyle: {
               paddingBottom: 5,
