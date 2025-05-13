@@ -1,25 +1,22 @@
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useContext } from 'react'
 import { useRouter } from 'expo-router'
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "@/app/_layout"; // adjust if in separate file
 import { UserDetailContext } from '@/context/UserDetailContext';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/config/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 
 
-const LandingPage = () => {
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-    const {userDetail, setUserDetail} = useContext(UserDetailContext)
+const Index = () => {
+    const router = useRouter()
+    const {user, setUser, recipe, setRecipe} = useContext(UserDetailContext)
     onAuthStateChanged(auth, async (user) => {
         if(user){
             const res = await getDoc(doc(db, "users", user?.email));
 
             if(res.exists()){
-                setUserDetail(res.data())
-                navigation.navigate("Main")
+                setUser(res.data())
+                router.push("/(tabs)/search")
             }
         }
     })
@@ -68,7 +65,7 @@ const LandingPage = () => {
                 
             }}
         onPress={() => {
-            navigation.navigate('SignUp')
+            router.push("/auth/sign-in")
         }}
         >
             <View style={{
@@ -76,7 +73,7 @@ const LandingPage = () => {
                 borderWidth: 1,
                 borderColor: "#FF6B6B",
                 paddingVertical: 8,
-                backgroundColor: "#8cb89f"
+                backgroundColor: "#FF6B6B"
                 
             }}>
                 <Text style={{color: "#f8f9f0", textAlign: "center"}}>
@@ -93,7 +90,7 @@ const LandingPage = () => {
                 
             }}
         onPress={() => {
-            navigation.navigate('SignIn')
+            router.push("/auth/sign-in")
         }}
         >
             <View style={{
@@ -115,7 +112,7 @@ const LandingPage = () => {
   )
 }
 
-export default LandingPage
+export default Index
 
 const styles = StyleSheet.create({
   background: {

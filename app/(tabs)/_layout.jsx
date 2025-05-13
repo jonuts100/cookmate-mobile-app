@@ -1,12 +1,11 @@
 import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { HouseLine, MagnifyingGlass, BookBookmark, User } from 'phosphor-react-native';
 
 // Screens
-import HomeScreen from './index';
+import HomeScreen from './home';
 import SearchScreen from './search';
 import SavedScreen from './saved';
 import ProfileScreen from './profile';

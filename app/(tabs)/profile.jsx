@@ -1,8 +1,14 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Switch } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { User, Gear, Bell, CreditCard, Question, SignOut, CaretDoubleRight, Shield, Heart } from "phosphor-react-native"
+import { useRouter } from "expo-router"
+import { useContext } from "react";
+import { UserDetailContext } from "@/context/UserDetailContext";
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  const { user } = useContext(UserDetailContext);
+  //console.log(userDetail);
   return (
     <SafeAreaView style={styles.container} edges={["right", "left"]}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -14,11 +20,12 @@ export default function ProfileScreen() {
               <User size={16} color="#FFF" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.profileName}>Jessica Wilson</Text>
-          <Text style={styles.profileEmail}>jessica.wilson@example.com</Text>
+          <Text style={styles.profileName}>{user.name}</Text>
+          <Text style={styles.profileEmail}>{user.email}</Text>
           <View style={styles.tierBadge}>
             <Heart size={14} color="#FF6B6B" />
-            <Text style={styles.tierText}>Premium Member</Text>
+            {user.member ? <Text style={styles.tierText}>Premium Member</Text> : <Text style={styles.tierText}>Regular Member</Text>}
+            
           </View>
           <TouchableOpacity style={styles.editProfileButton}>
             <Text style={styles.editProfileText}>Edit Profile</Text>
@@ -132,7 +139,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Logout */}
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => {router.push("/")}}>
           <SignOut size={20} color="#FF6B6B" />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>

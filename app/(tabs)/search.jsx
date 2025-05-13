@@ -20,7 +20,6 @@ import { MagnifyingGlass, X, ArrowLeft, Funnel } from "phosphor-react-native"
 import RecipeCard from "../components/recipe-card"
 import { useRouter } from "expo-router"
 import { fetchRecipes } from "../services/api"
-import type { Recipe } from "@/types/recipe"
 import { dishTypeOptions, cuisineOptions, dietOptions, intoleranceOptions } from "@/constants/data"
 import { BlurView } from "expo-blur"
 
@@ -29,16 +28,16 @@ const { width } = Dimensions.get("window")
 export default function SearchScreen() {
   const [showFilters, setShowFilters] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [recipes, setRecipes] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState(null)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
 
   // Filters
-  const [selectedDishTypes, setSelectedDishTypes] = useState<string[]>([])
-  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([])
-  const [selectedDiets, setSelectedDiets] = useState<string[]>([])
-  const [selectedIntolerances, setSelectedIntolerances] = useState<string[]>([])
+  const [selectedDishTypes, setSelectedDishTypes] = useState([])
+  const [selectedCuisines, setSelectedCuisines] = useState([])
+  const [selectedDiets, setSelectedDiets] = useState([])
+  const [selectedIntolerances, setSelectedIntolerances] = useState([])
 
   const router = useRouter()
   const filterSlideAnim = useRef(new Animated.Value(0)).current
@@ -117,10 +116,10 @@ export default function SearchScreen() {
   }
 
   const optionsFilter = (
-    title: string,
-    options: string[],
-    selectedOptions: string[],
-    setSelectedOptions: (options: string[]) => void,
+    title,
+    options,
+    selectedOptions,
+    setSelectedOptions
   ) => {
     return (
       <View style={styles.filterSection}>
@@ -260,7 +259,7 @@ export default function SearchScreen() {
       <View style={styles.resultsContainer}>
         {searchQuery ? (
           <View style={styles.resultsTitleContainer}>
-            <Text style={styles.resultsTitle}>Results for "{searchQuery}"</Text>
+            <Text style={styles.resultsTitle}>Results for {searchQuery}</Text>
             {recipes.length > 0 && <Text style={styles.resultsCount}>{recipes.length} recipes found</Text>}
           </View>
         ) : (
@@ -370,7 +369,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 6,
     backgroundColor: "#FFF",
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",

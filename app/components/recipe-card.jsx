@@ -1,18 +1,17 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, type ViewStyle } from "react-native"
-import { Clock, Flame, BookBookmark, Bookmark, Star } from "phosphor-react-native"
-import type { Recipe } from "@/types/recipe"
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native"
+import { Bookmark, Clock } from "phosphor-react-native"
 import { images } from "@/constants/images"
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "@/app/_layout"; // adjust if in separate file
+import { useRouter } from "expo-router";
+import { useContext } from "react";
+import { UserDetailContext } from "@/context/UserDetailContext";
 
-interface RecipeCardProps {
-  recipe: Recipe
-  style?: ViewStyle
-  layout?: "grid" | "list"
-}
+// interface RecipeCardProps {
+//   recipe: Recipe
+//   style?: ViewStyle
+//   layout?: "grid" | "list"
+// }
 
-export default function RecipeCard({ recipe, style, layout = "list" }: RecipeCardProps) {
+export default function RecipeCard({ recipe, style, layout = "list" }) {
   const isListLayout = layout === "list"
   const nutrientColors = {
     Calories: '#FFB74D',       // Orange
@@ -38,12 +37,15 @@ export default function RecipeCard({ recipe, style, layout = "list" }: RecipeCar
     meat: '#a73520',  // Teal — evokes the ocean and fish
   };
 
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+  const router = useRouter();
+  const { setRecipe } = useContext(UserDetailContext);
   return (
     <TouchableOpacity 
       style={[styles.container, isListLayout ? styles.listContainer : styles.gridContainer, style]} 
-      onPress={() => navigation.navigate("RecipeDetail", { recipe })}
+      onPress={() => {
+          setRecipe(recipe);
+          router.push(`/recipes/detail`);
+      }}
     >
       <View style={isListLayout ? styles.listContent : styles.gridContent}>
         
@@ -67,7 +69,8 @@ export default function RecipeCard({ recipe, style, layout = "list" }: RecipeCar
           </View>
 
           <Text style={styles.readyInText}>
-           Ready in {recipe.readyInMinutes} minutes
+            <Clock size={14} color="#0d0d0d" style={{marginRight: 5}}/>
+            {recipe.readyInMinutes} minutes
           </Text>
 
           <View style={styles.metaGridContainer}>

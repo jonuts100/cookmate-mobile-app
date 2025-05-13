@@ -1,6 +1,6 @@
 "use client"
 
-import { useContext, useState } from "react"
+import { useState } from "react"
 import {
   StyleSheet,
   Text,
@@ -12,51 +12,64 @@ import {
   Platform,
   ScrollView,
   ToastAndroid,
-  ActivityIndicator,
 } from "react-native"
 import { Feather } from "@expo/vector-icons"
-import { signInWithEmailAndPassword } from "firebase/auth"
+import { createUserWithEmailAndPassword} from "firebase/auth"
 import { auth, db } from "@/config/firebaseConfig"
-import { doc, getDoc } from "firebase/firestore"
+import { doc, setDoc } from "firebase/firestore"
+import { useContext } from "react"
 import { UserDetailContext } from "@/context/UserDetailContext"
-import { useNavigation, useRouter } from "expo-router"
-import { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { RootStackParamList } from "../_layout"
+import { useRouter } from "expo-router"
 
 
-const SignInPage = () => {
-  const navigation =useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+const SignUpPage = () => {
+  const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [secureTextEntry, setSecureTextEntry] = useState(true)
+  const [secureConfirmTextEntry, setSecureConfirmTextEntry] = useState(true)
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  
+  const [nameFocused, setNameFocused] = useState(false)
   const [emailFocused, setEmailFocused] = useState(false)
   const [passwordFocused, setPasswordFocused] = useState(false)
-  const {userDetail, setUserDetail} = useContext(UserDetailContext)
-  const [loading, setLoading] = useState(false)
-  // sign in function
-  const SignInUser = () => {
-    setLoading(true)
-    signInWithEmailAndPassword(auth, email, password)
-    .then(async (userCredential) => {
-      const user = userCredential.user;
-      console.log(user);
-      setLoading(false)
-      ToastAndroid.show("Success!", ToastAndroid.BOTTOM)
-      await getUserDetail()
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false)
 
-    })
-    .catch(e => {
-      console.log(e)
-      setLoading(false)
-      ToastAndroid.show("Invalid email or password", ToastAndroid.BOTTOM)
-    })
+  
+  const router = useRouter();
+  const {user, setUser, recipe, setRecipe} = useContext(UserDetailContext)
+  // creating new user
+  const CreateNewUser = () => {
+      createUserWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        console.log(user);
+        // store in db
+
+        await SaveUserToDb(user);
+        ToastAndroid.show("User created", ToastAndroid.BOTTOM)
+      })
+      .catch(e =>{
+        console.log(e);
+        ToastAndroid.show("Failed to create user", ToastAndroid.BOTTOM)
+      })
   }
 
-  const getUserDetail = async () => {
-    const result = await getDoc(doc(db, "users", email));
-    console.log(result.data);
-    setUserDetail(result.data);
-    navigation.navigate("Main")
+  const SaveUserToDb = async (user) => {
+
+    const data = {
+      name: fullName,
+      email: email,
+      password: password,
+      member: false,
+      uid: user?.uid
+    };
+
+    await setDoc(doc(db, "users", email), data);
+
+    setUser(data)
+    router.push("/(tabs)/home")
   }
   // Animation values
   const buttonScale = new Animated.Value(1)
@@ -66,7 +79,7 @@ const SignInPage = () => {
       toValue: 0.95,
       useNativeDriver: true,
     }).start()
-    
+    CreateNewUser();
   }
 
   const handlePressOut = () => {
@@ -76,22 +89,45 @@ const SignInPage = () => {
       tension: 40,
       useNativeDriver: true,
     }).start()
-    SignInUser();
   }
 
   const toggleSecureEntry = () => {
     setSecureTextEntry(!secureTextEntry)
   }
 
+  const toggleSecureConfirmEntry = () => {
+    setSecureConfirmTextEntry(!secureConfirmTextEntry)
+  }
+
+  const toggleTermsAccepted = () => {
+    setTermsAccepted(!termsAccepted)
+  }
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Sign up to get started</Text>
         </View>
 
         <View style={styles.formContainer}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Full Name</Text>
+            <View style={[styles.inputWrapper, nameFocused && styles.inputWrapperFocused]}>
+              <Feather name="user" size={20} color="#666" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your full name"
+                placeholderTextColor="#999"
+                value={fullName}
+                onChangeText={setFullName}
+                onFocus={() => setNameFocused(true)}
+                onBlur={() => setNameFocused(false)}
+              />
+            </View>
+          </View>
+
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Email</Text>
             <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}>
@@ -116,7 +152,7 @@ const SignInPage = () => {
               <Feather name="lock" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your password"
+                placeholder="Create a password"
                 placeholderTextColor="#999"
                 value={password}
                 onChangeText={setPassword}
@@ -130,33 +166,56 @@ const SignInPage = () => {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.forgotPasswordContainer}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Confirm Password</Text>
+            <View style={[styles.inputWrapper, confirmPasswordFocused && styles.inputWrapperFocused]}>
+              <Feather name="lock" size={20} color="#666" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm your password"
+                placeholderTextColor="#999"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={secureConfirmTextEntry}
+                onFocus={() => setConfirmPasswordFocused(true)}
+                onBlur={() => setConfirmPasswordFocused(false)}
+              />
+              <TouchableOpacity onPress={toggleSecureConfirmEntry} style={styles.eyeIcon}>
+                <Feather name={secureConfirmTextEntry ? "eye" : "eye-off"} size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.termsContainer}>
+            <TouchableOpacity 
+              style={styles.checkboxContainer} 
+              onPress={toggleTermsAccepted}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}>
+                {termsAccepted && <Feather name="check" size={14} color="#fff" />}
+              </View>
+            </TouchableOpacity>
+            <Text style={styles.termsText}>
+              I agree to the <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
+              <Text style={styles.termsLink}>Privacy Policy</Text>
+            </Text>
+          </View>
 
           <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
             <TouchableOpacity
-              style={styles.signInButton}
+              style={styles.signUpButton}
               onPressIn={handlePressIn}
               onPressOut={handlePressOut}
-              onPress={SignInUser}
               activeOpacity={0.8}
             >
-              {loading ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.signInButtonText}>Sign In</Text>}
-              
+              <Text style={styles.signUpButtonText}>Create Account</Text>
             </TouchableOpacity>
           </Animated.View>
 
-          <View style={styles.footerContainer}>
-            <Text style={styles.footerText}>Don&apos;t have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-              <Text style={styles.registerText}>Register</Text>
-            </TouchableOpacity>
-          </View>
-
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
-            <Text style={styles.dividerText}>or continue with</Text>
+            <Text style={styles.dividerText}>or sign up with</Text>
             <View style={styles.divider} />
           </View>
 
@@ -173,7 +232,12 @@ const SignInPage = () => {
           </View>
         </View>
 
-        
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
+            <Text style={styles.signInText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -182,7 +246,7 @@ const SignInPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9f0",
+    backgroundColor: "#f9f9f9",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -190,7 +254,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   headerContainer: {
-    marginBottom: 40,
+    marginBottom: 32,
   },
   title: {
     fontSize: 28,
@@ -218,7 +282,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#cbc7b7",
+    borderColor: "#e1e1e1",
     borderRadius: 12,
     backgroundColor: "#fff",
     paddingHorizontal: 16,
@@ -245,16 +309,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
-  forgotPasswordContainer: {
-    alignSelf: "flex-end",
+  termsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 24,
   },
-  forgotPasswordText: {
+  checkboxContainer: {
+    marginRight: 12,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#FF6B6B",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: "#FF6B6B",
+  },
+  termsText: {
+    flex: 1,
     fontSize: 14,
+    color: "#666",
+  },
+  termsLink: {
     color: "#FF6B6B",
     fontWeight: "600",
   },
-  signInButton: {
+  signUpButton: {
     backgroundColor: "#FF6B6B",
     borderRadius: 12,
     height: 56,
@@ -266,7 +350,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  signInButtonText: {
+  signUpButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
@@ -289,7 +373,7 @@ const styles = StyleSheet.create({
   socialButtonsContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: 24,
   },
   socialButton: {
     width: 50,
@@ -308,7 +392,6 @@ const styles = StyleSheet.create({
     borderColor: "#f0f0f0",
   },
   footerContainer: {
-    marginTop: 24,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -317,11 +400,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
-  registerText: {
+  signInText: {
     fontSize: 14,
     fontWeight: "bold",
     color: "#FF6B6B",
   },
 })
 
-export default SignInPage
+export default SignUpPage

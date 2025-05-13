@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,16 +14,11 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import HTML from 'react-native-render-html';
 import Collapsible from 'react-native-collapsible';
-import { Recipe } from '@/types/recipe';
-import { RouteProp, useRoute } from "@react-navigation/native";
-import type { RootStackParamList } from "@/app/_layout";
-
-type RecipeDetailRouteProp = RouteProp<RootStackParamList, "RecipeDetail">;
+import { UserDetailContext } from '@/context/UserDetailContext';
 
 const RecipeDetailScreen = () => {
-  const route = useRoute<RecipeDetailRouteProp>();
-  const { recipe } = route.params;
-
+  const { recipe } = useContext(UserDetailContext);
+ 
   const [isSaved, setIsSaved] = useState(false);
   const [isNutritionExpanded, setIsNutritionExpanded] = useState(false);
   const { width } = useWindowDimensions();
@@ -48,7 +43,7 @@ const RecipeDetailScreen = () => {
   // Get instructions
   const instructions = recipe.analyzedInstructions[0]?.steps || [];
 
-  const Badge = ({ label }: { label: string }) => (
+  const Badge = ({ label }) => (
     <View style={styles.badge}>
       <Text style={styles.badgeText}>{label}</Text>
     </View>
@@ -58,10 +53,6 @@ const RecipeDetailScreen = () => {
     label, 
     value, 
     unit 
-  }: { 
-    label: string; 
-    value: number | string; 
-    unit: string;
   }) => (
     <View style={styles.nutrientCard}>
       <Text style={styles.nutrientLabel}>{label}</Text>
