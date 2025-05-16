@@ -38,7 +38,7 @@ const SignUpPage = () => {
 
   
   const router = useRouter();
-  const {user, setUser, recipe, setRecipe} = useContext(UserDetailContext)
+  const {setUser} = useContext(UserDetailContext)
   // creating new user
   const CreateNewUser = () => {
       createUserWithEmailAndPassword(auth, email, password)
@@ -69,7 +69,7 @@ const SignUpPage = () => {
     await setDoc(doc(db, "users", email), data);
 
     setUser(data)
-    router.push("/(tabs)/home")
+    router.replace("/(tabs)/home")
   }
   // Animation values
   const buttonScale = new Animated.Value(1)

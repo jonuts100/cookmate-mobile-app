@@ -9,14 +9,13 @@ import { doc, getDoc } from 'firebase/firestore';
 
 const Index = () => {
     const router = useRouter()
-    const {user, setUser, recipe, setRecipe} = useContext(UserDetailContext)
-    onAuthStateChanged(auth, async (user) => {
+    const {user,  setUser } = useContext(UserDetailContext)
+    onAuthStateChanged(auth, async () => {
         if(user){
             const res = await getDoc(doc(db, "users", user?.email));
 
             if(res.exists()){
                 setUser(res.data())
-                router.push("/(tabs)/search")
             }
         }
     })

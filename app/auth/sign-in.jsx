@@ -32,7 +32,7 @@ const SignInPage = () => {
   const [emailFocused, setEmailFocused] = useState(false)
   const [passwordFocused, setPasswordFocused] = useState(false)
 
-  const {userDetail, setUserDetail, recipe, setRecipe} = useContext(UserDetailContext)
+  const { setUser } = useContext(UserDetailContext)
   const [loading, setLoading] = useState(false)
   // sign in function
   const SignInUser = () => {
@@ -56,7 +56,7 @@ const SignInPage = () => {
   const getUserDetail = async () => {
     const result = await getDoc(doc(db, "users", email));
     console.log(result.data);
-    setUserDetail(result.data);
+    setUser(result.data);
     router.push("/(tabs)/home")
   }
   // Animation values

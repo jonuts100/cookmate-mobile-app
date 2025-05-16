@@ -14,5 +14,5 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "nativewind-env.d.ts"
-, "context/UserDetailContext.jsx", "app/(tabs)/home.jsx", "app/(tabs)/create.jsx", "app/(tabs)/_layout.jsx", "app/(tabs)/profile.jsx", "app/(tabs)/saved.jsx", "app/(tabs)/search.jsx", "app/auth/landing.jsx", "app/auth/sign-in.jsx", "app/auth/sign-up.jsx", "app/components/recipe-card.jsx", "app/recipes/detail.jsx", "app/_layout.jsx", "app/index.jsx"  ]
+, "context/UserDetailContext.jsx", "app/(tabs)/home.jsx", "app/(tabs)/create.jsx", "app/(tabs)/_layout.jsx", "app/(tabs)/profile.jsx", "app/(tabs)/saved.jsx", "app/(tabs)/search.jsx", "app/auth/landing.jsx", "app/auth/sign-in.jsx", "app/auth/sign-up.jsx", "app/components/recipe-card.jsx", "app/recipes/detail.jsx", "app/_layout.jsx", "app/index.jsx", "app/screens/preferences-page.jsx", "app/screens/ingredients-page.jsx"  ]
 }

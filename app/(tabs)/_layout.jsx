@@ -1,22 +1,10 @@
 import React from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StatusBar } from 'expo-status-bar';
 import { HouseLine, MagnifyingGlass, BookBookmark, User } from 'phosphor-react-native';
+import { Tabs } from 'expo-router';
 
-// Screens
-import HomeScreen from './home';
-import SearchScreen from './search';
-import SavedScreen from './saved';
-import ProfileScreen from './profile';
-
-const Tab = createBottomTabNavigator();
-
-export default function App() {
+export default function TabLayout() {
   return (
-    <SafeAreaProvider>
-        <StatusBar style="auto" />
-        <Tab.Navigator
+    <Tabs
           screenOptions={{
             tabBarActiveTintColor: '#FF6B6B',
             tabBarInactiveTintColor: '#888',
@@ -27,44 +15,45 @@ export default function App() {
             },
             headerShown: true,
           }}
+          
         >
-          <Tab.Screen 
-            name="Home" 
-            component={HomeScreen} 
+          <Tabs.Screen 
+            name="home" 
             options={{
               tabBarIcon: ({ color, size }) => (
                 <HouseLine color={color} size={size} />
               ),
+              unmountOnBlur: true, 
             }}
+            
           />
-          <Tab.Screen 
-            name="Search" 
-            component={SearchScreen} 
+          <Tabs.Screen 
+            name="search" 
             options={{
               tabBarIcon: ({ color, size }) => (
                 <MagnifyingGlass color={color} size={size} />
               ),
+              unmountOnBlur: true, 
             }}
           />
-          <Tab.Screen 
-            name="Saved" 
-            component={SavedScreen} 
+          <Tabs.Screen 
+            name="saved" 
             options={{
               tabBarIcon: ({ color, size }) => (
                 <BookBookmark color={color} size={size} />
               ),
+              unmountOnBlur: true, 
             }}
           />
-          <Tab.Screen 
-            name="Profile" 
-            component={ProfileScreen} 
+          <Tabs.Screen 
+            name="profile" 
             options={{
               tabBarIcon: ({ color, size }) => (
                 <User color={color} size={size} />
               ),
+              unmountOnBlur: true, 
             }}
           />
-        </Tab.Navigator>
-    </SafeAreaProvider>
+        </Tabs>
   );
 }

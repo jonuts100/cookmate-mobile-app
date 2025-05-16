@@ -1,6 +1,9 @@
 // context/UserDetailContext.jsx
 import { createContext } from "react";
 
-// You can add PropTypes later if desired
-export const UserDetailContext = createContext();
-
+export const UserDetailContext = createContext({
+  user: null,
+  setUser: () => {},
+  recipe: null,
+  setRecipe: () => {},
+});

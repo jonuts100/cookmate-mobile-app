@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState, useCallback, useRef } from "react"
 import {
   StyleSheet,
@@ -11,19 +9,15 @@ import {
   ActivityIndicator,
   ScrollView,
   Animated,
-  Dimensions,
   Image,
   Platform,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { MagnifyingGlass, X, ArrowLeft, Funnel } from "phosphor-react-native"
+import { MagnifyingGlass, X, Funnel } from "phosphor-react-native"
 import RecipeCard from "../components/recipe-card"
-import { useRouter } from "expo-router"
 import { fetchRecipes } from "../services/api"
 import { dishTypeOptions, cuisineOptions, dietOptions, intoleranceOptions } from "@/constants/data"
 import { BlurView } from "expo-blur"
-
-const { width } = Dimensions.get("window")
 
 export default function SearchScreen() {
   const [showFilters, setShowFilters] = useState(false)
@@ -39,7 +33,6 @@ export default function SearchScreen() {
   const [selectedDiets, setSelectedDiets] = useState([])
   const [selectedIntolerances, setSelectedIntolerances] = useState([])
 
-  const router = useRouter()
   const filterSlideAnim = useRef(new Animated.Value(0)).current
   const filterOpacityAnim = useRef(new Animated.Value(0)).current
 

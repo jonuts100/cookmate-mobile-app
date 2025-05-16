@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -8,7 +6,7 @@ import RecipeCard from "../components/recipe-card"
 import { mockRecipes } from "@/constants/data"
 
 export default function SavedScreen() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [viewMode, setViewMode] = useState("grid")
   const savedRecipes = mockRecipes.filter((_, index) => index % 2 === 0) // Mock saved recipes
 
   const renderEmptyState = () => (
