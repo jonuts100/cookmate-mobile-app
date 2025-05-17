@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Alert, TouchableOpacity, Image, ScrollView, Pressable, FlatList } from 'react-native'
+import { StyleSheet, Text, View, Alert, TouchableOpacity, Image, ScrollView, Pressable } from 'react-native'
 import React, { useState } from 'react'
 import * as ImagePicker from "expo-image-picker"
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'
@@ -9,12 +9,15 @@ import { useRouter } from "expo-router"
 import IngredientCard from '../components/ingredients-card'
 import AddIngredientModal from '../components/create-recipe/AddIngredientModal'
 import Slider from '@react-native-community/slider';
+import { generateRecipeFromGemini, RecipePromptInput } from '../services/gemini'
 
 const CreateRecipeScreen = () => {
     const router = useRouter()
 
     const [image, setImage] = useState(null)
     const [error, setError] = useState(null)
+
+    // ingredients
     const [ingredients, setIngredients] = useState([])
     const [modalVisible, setModalVisible] = useState(false)
 
@@ -42,6 +45,48 @@ const CreateRecipeScreen = () => {
     const SERVINGTIME_POINTS = [15,30,45,60]
     const [servingTime, setServingTime] = useState(30)
 
+    const [generatedRecipes, setRecipes] = useState([]);
+    
+    const generateRecipe = async () => {
+        const userInput = {
+            ingredients,
+            intolerances,
+            cuisines,
+            diets,
+            dishType,
+            servings,
+            cookingTime: servingTime,
+            minCarbs: minimumCarbs,
+            minFats: minimumFat,
+            minProteins: minimumProtein,
+            equipmentLevel
+        }
+        try {
+            const recipes = await generateRecipeFromGemini(userInput);
+
+            if (recipes) {
+                console.log("GENERATED RECIPES:", recipes)
+                const match = recipes.match(/{[\s\S]*}/)
+
+                if (!match) {
+                    throw new Error("No valid JSON object found in caption.")
+                }
+
+                const rp = match[0]
+                const parsedRecipes = JSON.parse(rp)
+
+                if (parsedRecipes.recipes) {
+                    setRecipes(parsedRecipes.recipes)
+                } else {
+                    throw new Error("Parsed JSON does not contain 'ingredients'")
+                }
+            } else {
+                throw new Error("Failed to generate caption")
+            }
+        } catch (error) {
+            console.error("Failed to generate recipes:", error);
+        }
+    }
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
 
@@ -144,6 +189,7 @@ const CreateRecipeScreen = () => {
     const toggleEquipmentLevel = (level) => {
         setEquipmentLevel(level);
     }
+
     
 
     return (
@@ -577,7 +623,7 @@ const CreateRecipeScreen = () => {
                     styles.continueButton,
                     ingredients.length === 0 && styles.disabledButton
                 ]}
-                onPress={handleSaveAndContinue}
+                onPress={generateRecipe}
                 disabled={ingredients.length === 0}
             >
                 <Text style={styles.continueButtonText}>Save and Continue</Text>

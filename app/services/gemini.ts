@@ -9,6 +9,22 @@ import * as FileSystem from 'expo-file-system';
  * @param modelName - The name of the Gemini model to use (optional, defaults to "gemini-2.0-flash").
  * @returns A promise that resolves to the generated caption, or null on error.
  */
+
+export interface RecipePromptInput {
+  ingredients: string[];
+  cuisines?: string[];
+  dishType?: string[]; // now a list
+  intolerances?: string[];
+  diets?: string[];
+  servings?: number;
+  cookingTime?: number;
+  minCarbs?: number;
+  minFats?: number;
+  minProteins?: number;
+  equipmentLevel?: string;
+}
+
+
 export async function generateImageCaption(
     imagePath: string,
     prompt: string =  "Scan all the food ingredients you see in this image. List down all the ingredients, and the estimated quantity with units.",
@@ -88,4 +104,133 @@ export async function generateImageCaption(
         console.error("Error generating image caption:", error);
         return null; // Handle the error and return null
     }
+}
+
+
+function generateRecipePrompt({
+  ingredients,
+  cuisines = [],
+  dishType = [],
+  intolerances = [],
+  diets = [],
+  servings = 1,
+  cookingTime = undefined,
+  minCarbs = undefined,
+  minFats = undefined,
+  minProteins = undefined,
+  equipmentLevel = "basic"
+}: RecipePromptInput): string {
+  const listOrNone = (arr: string[]) => arr.length ? arr.join(", ") : "none specified";
+  const withUnit = (val: number | undefined, unit: string) => val !== undefined ? `${val} ${unit}` : "not specified";
+  const quoteList = (arr: string[]) => arr.map(item => `"${item}"`).join(", ");
+
+  return `
+You are an expert AI chef. Based on the user inputs, generate at least **3 creative and nutritious recipes**.
+
+Respond ONLY in the following structured **JSON array format**:
+
+\`\`\`json
+{
+  "recipes": [
+  {
+    "id": <number>,
+    "image": "<image_url>",
+    "imageType": "jpg",
+    "title": "<recipe name>",
+    "readyInMinutes": <number>,
+    "servings": ${servings},
+    "healthScore": <number>,
+    "creditsText": "AI Generated",
+    "nutrition": {
+      "nutrients": [
+        {
+          "name": "Protein",
+          "amount": <number>,
+          "unit": "g",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Fat",
+          "amount": <number>,
+          "unit": "g",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Carbohydrates",
+          "amount": <number>,
+          "unit": "g",
+          "percentOfDailyNeeds": <number>
+        }
+      ]
+    },
+    "summary": "<short HTML-formatted description of the dish>",
+    "cuisines": [${quoteList(cuisines)}],
+    "dishTypes": [${quoteList(dishType)}],
+    "diets": [${quoteList(diets)}],
+    "analyzedInstructions": [
+      {
+        "name": "",
+        "steps": [
+          {
+            "number": 1,
+            "step": "<step instruction>",
+            
+          }
+          // more steps...
+        ]
+      }
+    ]
+  }
+  // 2 more recipe objects...
+]
+}
+\`\`\`
+
+---
+
+### 🧾 User Preferences
+
+**Ingredients Available**: ${ingredients.join(", ")}  
+**Preferred Cuisines**: ${listOrNone(cuisines)}  
+**Dish Types**: ${listOrNone(dishType)}  
+**Avoid These (Intolerances)**: ${listOrNone(intolerances)}  
+**Dietary Preferences**: ${listOrNone(diets)}  
+**Servings Needed**: ${servings}  
+**Max Cooking Time**: ${withUnit(cookingTime, "minutes")}  
+**Minimum Macros Per Serving**:
+- Protein: ${withUnit(minProteins, "g")}
+- Fats: ${withUnit(minFats, "g")}
+- Carbs: ${withUnit(minCarbs, "g")}
+
+**Kitchen Equipment Level**: ${equipmentLevel} (assume user has ${equipmentLevel}-level tools)
+
+Please ensure:
+- You generate at least 3 diverse recipes.
+- Each recipe uses most of the provided ingredients.
+- All dietary and intolerance rules are followed.
+- All responses are valid **JSON**, suitable for frontend rendering.
+`.trim();
+}
+
+
+export async function generateRecipeFromGemini(userInput: RecipePromptInput): Promise<any> {
+  const prompt = generateRecipePrompt(userInput);
+  const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || "";
+  const ai = new GoogleGenAI({apiKey: apiKey});
+  const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents: prompt,
+    config: {
+      temperature: 0.2,
+      systemInstruction: "You are a professional home cook and recipe expert named Neko. You specialize in creating creative, nutritious, and easy-to-follow recipes tailored to the user's available ingredients, dietary preferences, and cooking equipment. Always respond with helpful, clear, and structured cooking instructions in a JSON format suitable for use in a cooking app."
+    },
+  });
+    // Check if response.text is defined before accessing it.
+  if (response && response.candidates && response.candidates[0] && response.candidates[0].content) {
+      return response.text!
+  } else {
+      console.warn("Received empty response from Gemini API.");
+      return null; // Or you might want to throw an error here.
+  }
+  
 }
