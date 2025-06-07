@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React, { useContext } from 'react'
 import { TouchableOpacity } from 'react-native'
-import { BowlFood } from 'phosphor-react-native'
+import { BowlFood, PlusCircle } from 'phosphor-react-native'
 import { UserDetailContext } from '@/context/UserDetailContext'
 import { useRouter } from 'expo-router'
 
@@ -13,7 +13,7 @@ const Header = () => {
     
         <View style={{
             paddingHorizontal: 20,
-            paddingVertical: 16,
+            paddingTop: 50,
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
@@ -29,15 +29,15 @@ const Header = () => {
                     fontWeight: "bold",
                     color: "#333",
                 }}>
-                    Hello User
+                    Hello {user.name || "Chef"}!
                 </Text>
                 <Text style={{fontSize: 14, color: "#666"}}>
-                    Welcome to CookMate
+                    Welcome to Cookmate
                 </Text>
 
             </View>
             <TouchableOpacity onPress={() => {router.push("/screens/create-recipe")}}>
-                <BowlFood size={32} color="#FF6B6B" />
+                <PlusCircle size={32} color="#FF6B6B" />
             </TouchableOpacity>
         </View>
         </>

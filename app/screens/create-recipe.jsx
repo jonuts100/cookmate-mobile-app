@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Alert, TouchableOpacity, Image, ScrollView, Pressable } from 'react-native'
-import React, { useState } from 'react'
+import { StyleSheet, Text, View, Alert, TouchableOpacity, Image, ScrollView, Pressable, ActivityIndicator } from 'react-native'
+import React, { useContext, useState } from 'react'
 import * as ImagePicker from "expo-image-picker"
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'
 import 'react-native-url-polyfill/auto'
@@ -10,9 +10,18 @@ import IngredientCard from '../components/ingredients-card'
 import AddIngredientModal from '../components/create-recipe/AddIngredientModal'
 import Slider from '@react-native-community/slider';
 import { generateRecipeFromGemini, RecipePromptInput } from '../services/gemini'
+import { UserDetailContext } from '../../context/UserDetailContext'
+import { setDoc, doc, addDoc, collection } from "firebase/firestore"
+import { db } from "../../config/firebaseConfig"
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
+
 
 const CreateRecipeScreen = () => {
     const router = useRouter()
+
+    const [isLoading, setLoading] = useState(false)
+
+    const { user } = useContext(UserDetailContext);
 
     const [image, setImage] = useState(null)
     const [error, setError] = useState(null)
@@ -45,9 +54,8 @@ const CreateRecipeScreen = () => {
     const SERVINGTIME_POINTS = [15,30,45,60]
     const [servingTime, setServingTime] = useState(30)
 
-    const [generatedRecipes, setRecipes] = useState([]);
-    
     const generateRecipe = async () => {
+        setLoading(true)
         const userInput = {
             ingredients,
             intolerances,
@@ -61,31 +69,46 @@ const CreateRecipeScreen = () => {
             minProteins: minimumProtein,
             equipmentLevel
         }
+
         try {
-            const recipes = await generateRecipeFromGemini(userInput);
+            const RESULT = await generateRecipeFromGemini(userInput);
+            const match = RESULT.match(/{[\s\S]*}/)
 
-            if (recipes) {
-                console.log("GENERATED RECIPES:", recipes)
-                const match = recipes.match(/{[\s\S]*}/)
-
-                if (!match) {
-                    throw new Error("No valid JSON object found in caption.")
-                }
-
-                const rp = match[0]
-                const parsedRecipes = JSON.parse(rp)
-
-                if (parsedRecipes.recipes) {
-                    setRecipes(parsedRecipes.recipes)
-                } else {
-                    throw new Error("Parsed JSON does not contain 'ingredients'")
-                }
-            } else {
-                throw new Error("Failed to generate caption")
+            if (!match) {
+                throw new Error("No valid JSON object found in caption.")
             }
+            console.log("Raw Recipe Result:", RESULT)
+            // Extract the first match which should be the JSON object
+            console.log("Matched JSON:", match[0])
+            const rp = match[0]
+            const parsedRecipes = JSON.parse(rp)
+
+            const recipe = parsedRecipes.recipe
+            console.log("Parsed Recipe:", recipe)
+            if (recipe) {
+                console.log("Generated Recipe:", recipe);
+                console.log("User:", user?.email);
+                await addDoc(collection(db, "recipes"), {
+                    ...recipe,
+                    createdOn: Date.now(),
+                    createdBy: user?.email
+                })
+                
+                setLoading(false)
+                router.push("/(tabs)/home")
+            } else {
+                setLoading(false)
+                throw new Error("Parsed JSON does not contain 'ingredients'")
+                
+            }
+            setLoading(false)
+            router.push("/(tabs)/home")
+            
         } catch (error) {
+            setLoading(false)
             console.error("Failed to generate recipes:", error);
         }
+        
     }
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -168,16 +191,6 @@ const CreateRecipeScreen = () => {
         setIngredients(updatedIngredients)
     }
 
-    const handleSaveAndContinue = () => {
-        if (ingredients.length === 0) {
-            Alert.alert("No ingredients", "Please add at least one ingredient before continuing")
-            return
-        }
-        
-        // Navigate to user preferences page
-        router.push("/user-preferences")
-    }
-
     const toggleItem = (item, list, setList) => {
         if (list.includes(item)) {
             setList(list.filter(i => i !== item));
@@ -190,10 +203,17 @@ const CreateRecipeScreen = () => {
         setEquipmentLevel(level);
     }
 
-    
+    const insets = useSafeAreaInsets();
 
     return (
-        <ScrollView style={styles.container}>
+        
+        <ScrollView 
+            style={styles.container}
+            contentContainerStyle={{
+                paddingBottom: insets.bottom + 20, 
+                paddingTop: insets.top + 20, 
+            }}
+        >
             <View style={styles.headerContainer}>
                 <Text style={styles.header}>What are we cooking with?</Text>
                 <Text style={styles.subHeader}>Upload a photo of your ingredients</Text>
@@ -626,8 +646,13 @@ const CreateRecipeScreen = () => {
                 onPress={generateRecipe}
                 disabled={ingredients.length === 0}
             >
-                <Text style={styles.continueButtonText}>Save and Continue</Text>
-                <Ionicons name="arrow-forward" size={22} color="#FFFFFF" style={styles.buttonIcon} />
+                {isLoading ? 
+                <ActivityIndicator size="small" color="#FFFFFF" /> : 
+                <View>
+                    <Text style={styles.continueButtonText}>Generate Recipes</Text>
+                </View>
+                }
+                
             </TouchableOpacity>
 
             <AddIngredientModal 
@@ -636,6 +661,7 @@ const CreateRecipeScreen = () => {
                 onAdd={handleAddIngredient}
             />
         </ScrollView>
+        
     )
 }
 
@@ -645,75 +671,74 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#F9F9F9',
+        backgroundColor: '#F8F9FA', // Lighter background color
     },
     headerContainer: {
-        marginBottom: 20,
+        marginBottom: 24,
         marginTop: 40,
     },
     header: {
-        fontSize: 28,
-        fontWeight: "700",
-        color: '#333333',
+        fontSize: 32, // Larger font size for emphasis
+        fontWeight: 'bold', // Bolder for better hierarchy
+        color: '#212529', // Darker text color
         marginBottom: 8,
     },
     subHeader: {
-        fontSize: 16,
-        color: '#666666',
+        fontSize: 18, // Slightly larger for readability
+        color: '#6C757D', // Softer color for secondary text
     },
     imageControlsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20,
-        height: 100,
+        marginBottom: 24,
+        height: 120, // Increased height for a better look
     },
     placeholderContainer: {
-        width: '30%',
+        width: '32%', // Adjusted width
         height: '100%',
         borderRadius: 16,
         borderWidth: 2,
-        borderColor: '#DDDDDD',
+        borderColor: '#E9ECEF', // Softer border color
         borderStyle: 'dashed',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F0F0F0',
+        backgroundColor: '#FFFFFF',
     },
     placeholderText: {
         marginTop: 8,
-        fontSize: 12,
-        color: '#999999',
+        fontSize: 14,
+        color: '#ADB5BD',
     },
     imageContainer: {
         position: 'relative',
         borderRadius: 16,
         overflow: 'hidden',
-        width: '30%',
+        width: '32%', // Adjusted width
         height: '100%',
         shadowColor: "#000000",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
         shadowRadius: 8,
-        elevation: 5,
+        elevation: 6,
     },
     image: {
         width: '100%',
         height: '100%',
-        borderRadius: 16,
     },
     removeButton: {
         position: 'absolute',
         top: 8,
         right: 8,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        width: 28,
-        height: 28,
-        borderRadius: 14,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
     },
     controlButton: {
-        width: "30%",
+        width: "32%", // Adjusted width
         height: '100%',
         flexDirection: 'column',
         alignItems: 'center',
@@ -721,24 +746,24 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 4,
     },
     galleryButton: {
-        backgroundColor: "#5E72E4",
+        backgroundColor: "#6A82FB", // New color
     },
     cameraButton: {
-        backgroundColor: "#11CDEF",
+        backgroundColor: "#17A2B8", // New color
     },
     identifyButton: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 20,
-        backgroundColor: "#FF5252",
+        padding: 18,
+        borderRadius: 16,
+        marginBottom: 24,
+        backgroundColor: "#FF6B6B", // New color
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -746,132 +771,125 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     buttonIcon: {
-        marginRight: 8,
+        marginRight: 10,
     },
     buttonText: {
         color: "#FFFFFF",
-        fontSize: 16,
-        fontWeight: "600",
+        fontSize: 18,
+        fontWeight: "bold", // Bolder text
     },
     errorText: {
-        color: "#FF5252",
-        marginBottom: 12,
+        color: "#D9534F", // More standard error color
+        marginBottom: 16,
         fontSize: 14,
         textAlign: 'center',
     },
     ingredientsContainer: {
         flex: 1,
         backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 20,
+        borderRadius: 20, // More rounded corners
+        padding: 20,
+        marginBottom: 24,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        shadowOpacity: 0.08,
+        shadowRadius: 5,
+        elevation: 3,
     },
     sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 20,
     },
     sectionTitle: {
-        fontSize: 20,
-        fontWeight: "700",
-        color: '#333333',
+        fontSize: 22,
+        fontWeight: "bold",
+        color: '#343A40',
     },
     addIngredientButton: {
-        backgroundColor: '#5E72E4',
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        backgroundColor: '#6A82FB',
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         justifyContent: 'center',
         alignItems: 'center',
     },
     ingredientsList: {
         flex: 1,
     },
-
     userSectionContainer: {
-        flex: 1,
         backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 20,
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 24,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-
+        shadowOpacity: 0.08,
+        shadowRadius: 5,
+        elevation: 3,
     },
     optionContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gapHorizontal: 8,
+        gap: 12, // More consistent gap
     },
     optionButton: {
-        padding: 6,
+        paddingVertical: 10, // More vertical padding
+        paddingHorizontal: 16, // More horizontal padding
         borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        margin: 5,
-        backgroundColor: '#fff',
+        borderColor: '#CED4DA',
+        borderRadius: 20, // More rounded
+        backgroundColor: '#FFFFFF',
     },
-
     optionButtonSelected: {
-        backgroundColor: '#000', // Green for selected
-        borderColor: '#000',
+        backgroundColor: '#343A40',
+        borderColor: '#343A40',
     },
-
     optionButtonText: {
-        color: '#000',
+        color: '#495057',
+        fontWeight: '500', // Medium weight for better readability
     },
-
     optionButtonTextSelected: {
-        color: '#fff',
+        color: '#FFFFFF',
         fontWeight: 'bold',
     },
     sliderContainer: {
-        display: 'flex',
-        flexDirection: "column",
-
+        marginBottom: 16,
     },
-    
     emptyState: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
+        paddingVertical: 40,
     },
     emptyStateText: {
-        marginTop: 12,
+        marginTop: 16,
         fontSize: 16,
-        color: '#999999',
+        color: '#ADB5BD',
         textAlign: 'center',
+        lineHeight: 24, // Improved line height
     },
     continueButton: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        padding: 16,
-        borderRadius: 12,
-        backgroundColor: "#5E72E4",
+        padding: 18,
+        borderRadius: 16,
+        backgroundColor: "#28A745", // Success color
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
         elevation: 3,
+        marginBottom: 20, // Add some bottom margin
     },
     disabledButton: {
-        backgroundColor: "#CCCCCC",
+        backgroundColor: "#CED4DA",
     },
     continueButtonText: {
         color: "#FFFFFF",
-        fontSize: 16,
-        fontWeight: "600",
-        marginRight: 8,
+        fontSize: 18,
+        fontWeight: "bold",
     },
 });

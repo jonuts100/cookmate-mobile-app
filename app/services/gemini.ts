@@ -1,6 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
 import * as FileSystem from 'expo-file-system';
-
 /**
  * Generates a caption for an image using the Gemini API.
  *
@@ -35,7 +34,7 @@ export async function generateImageCaption(
             return null;
         }
 
-    console.log("generateImageCaption received:", imagePath);
+    
     try {
         const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || "";
         const ai = new GoogleGenAI({apiKey: apiKey});
@@ -123,18 +122,46 @@ function generateRecipePrompt({
   const listOrNone = (arr: string[]) => arr.length ? arr.join(", ") : "none specified";
   const withUnit = (val: number | undefined, unit: string) => val !== undefined ? `${val} ${unit}` : "not specified";
   const quoteList = (arr: string[]) => arr.map(item => `"${item}"`).join(", ");
-
   return `
-You are an expert AI chef. Based on the user inputs, generate at least **3 creative and nutritious recipes**.
+You are a world-class AI chef. You will generate **one recipe only** in **strict JSON format** based on the user's ingredients and preferences.
 
-Respond ONLY in the following structured **JSON array format**:
+---
+
+### 🍳 ABSOLUTE RULES:
+
+1. ✅ **Use ONLY the ingredients provided below** — no substitutions, no assumptions, no additions.
+2. ❌ **Do NOT invent or assume** any ingredients (e.g., oil, salt, garlic, herbs, spices) unless they are explicitly listed.
+3. ✅ The recipe must use only these ingredients and reflect them accurately in all steps, instructions, and nutrition.
+4. ✅ The response must contain exactly **one recipe**, not more.
+5. ✅ Follow all dietary and intolerance requirements strictly.
+6. ✅ Assume the user has only **${equipmentLevel}-level kitchen tools**.
+
+---
+
+### 🧾 User Inputs
+
+- **Ingredients**: ${quoteList(ingredients)}
+- **Preferred Cuisines**: ${listOrNone(cuisines)}
+- **Dish Types**: ${listOrNone(dishType)}
+- **Avoid These (Intolerances)**: ${listOrNone(intolerances)}
+- **Diets**: ${listOrNone(diets)}
+- **Servings**: ${servings}
+- **Max Cooking Time**: ${withUnit(cookingTime, "minutes")}
+- **Minimum Macros per Serving**:
+  - Protein: ${withUnit(minProteins, "g")}
+  - Fats: ${withUnit(minFats, "g")}
+  - Carbs: ${withUnit(minCarbs, "g")}
+
+---
+
+### 🧠 JSON Response Format
+
+Respond ONLY with a valid JSON object like this (no markdown, no commentary):
 
 \`\`\`json
 {
-  "recipes": [
-  {
-    "id": <number>,
-    "image": "<image_url>",
+  "recipe": {
+    "image": "<food_image_url>",
     "imageType": "jpg",
     "title": "<recipe name>",
     "readyInMinutes": <number>,
@@ -143,6 +170,12 @@ Respond ONLY in the following structured **JSON array format**:
     "creditsText": "AI Generated",
     "nutrition": {
       "nutrients": [
+        {
+          "name": "Calories",
+          "amount": <number>,
+          "unit": "kcal",
+          "percentOfDailyNeeds": <number>
+        },
         {
           "name": "Protein",
           "amount": <number>,
@@ -160,6 +193,176 @@ Respond ONLY in the following structured **JSON array format**:
           "amount": <number>,
           "unit": "g",
           "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Net Carbohydrates",
+          "amount": <number>,
+          "unit": "g",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Sugar",
+          "amount": <number>,
+          "unit": "g",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Cholesterol",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Sodium",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Alcohol",
+          "amount": <number>,
+          "unit": "g",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Alcohol %",
+          "amount": <number>,
+          "unit": "%",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Protein",
+          "amount": <number>,
+          "unit": "g",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Manganese",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin C",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Magnesium",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Phosphorus",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Copper",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Folate",
+          "amount": <number>,
+          "unit": "µg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin A",
+          "amount": <number>,
+          "unit": "IU",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Fiber",
+          "amount": <number>,
+          "unit": "g",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin B6",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Iron",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin B1",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Zinc",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin E",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin B2",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Potassium",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Calcium",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Selenium",
+          "amount": <number>,
+          "unit": "µg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin B5",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin B3",
+          "amount": <number>,
+          "unit": "mg",
+          "percentOfDailyNeeds": <number>
+        },
+        {
+          "name": "Vitamin K",
+          "amount": <number>,
+          "unit": "µg",
+          "percentOfDailyNeeds": <number>
+        }
+      ],
+      "ingredients": [
+        {
+          "name": <ingredient name>,
+          "amount" : <number>,
+          "unit" : <unit>,
+          "percentOfDailyNeeds": <number>
         }
       ]
     },
@@ -174,44 +377,35 @@ Respond ONLY in the following structured **JSON array format**:
           {
             "number": 1,
             "step": "<step instruction>",
-            
+            "ingredients" : [
+              {
+                "name": <ingredient name>
+              }
+              // More ingredients if needed...
+            ],
+            "equipment" : [
+              {
+                "name": <equipment name>,
+              }
+              // More equipment if needed...
+            ]
           }
-          // more steps...
+          // More steps if needed...
         ]
       }
     ]
   }
-  // 2 more recipe objects...
-]
 }
 \`\`\`
 
 ---
 
-### 🧾 User Preferences
-
-**Ingredients Available**: ${ingredients.join(", ")}  
-**Preferred Cuisines**: ${listOrNone(cuisines)}  
-**Dish Types**: ${listOrNone(dishType)}  
-**Avoid These (Intolerances)**: ${listOrNone(intolerances)}  
-**Dietary Preferences**: ${listOrNone(diets)}  
-**Servings Needed**: ${servings}  
-**Max Cooking Time**: ${withUnit(cookingTime, "minutes")}  
-**Minimum Macros Per Serving**:
-- Protein: ${withUnit(minProteins, "g")}
-- Fats: ${withUnit(minFats, "g")}
-- Carbs: ${withUnit(minCarbs, "g")}
-
-**Kitchen Equipment Level**: ${equipmentLevel} (assume user has ${equipmentLevel}-level tools)
-
-Please ensure:
-- You generate at least 3 diverse recipes.
-- Each recipe uses most of the provided ingredients.
-- All dietary and intolerance rules are followed.
-- All responses are valid **JSON**, suitable for frontend rendering.
+### 🔒 Final Reminder:
+- Use only the ingredients: ${quoteList(ingredients)}
+- Generate just **one recipe**
+- Do not add or invent anything else
 `.trim();
 }
-
 
 export async function generateRecipeFromGemini(userInput: RecipePromptInput): Promise<any> {
   const prompt = generateRecipePrompt(userInput);
@@ -234,3 +428,4 @@ export async function generateRecipeFromGemini(userInput: RecipePromptInput): Pr
   }
   
 }
+

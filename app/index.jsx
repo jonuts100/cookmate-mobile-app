@@ -64,7 +64,7 @@ const Index = () => {
                 
             }}
         onPress={() => {
-            router.push("/auth/sign-in")
+            router.push("/auth/sign-up")
         }}
         >
             <View style={{

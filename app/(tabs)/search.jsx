@@ -118,9 +118,9 @@ export default function SearchScreen() {
       <View style={styles.filterSection}>
         <Text style={styles.filterSectionTitle}>{title}</Text>
         <View style={styles.filterOptionsContainer}>
-          {options.map((option) => (
+          {options.map((option, index) => (
             <TouchableOpacity
-              key={option}
+              key={index}
               style={[styles.filterItem, selectedOptions.includes(option) && styles.filterItemSelected]}
               onPress={() => {
                 setSelectedOptions((prev) => {

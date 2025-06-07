@@ -5,5 +5,5 @@ export const UserDetailContext = createContext({
   user: null,
   setUser: () => {},
   recipe: null,
-  setRecipe: () => {},
+  setRecipe: () => {}
 });

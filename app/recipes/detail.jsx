@@ -24,22 +24,21 @@ const RecipeDetailScreen = () => {
   const { width } = useWindowDimensions();
 
   // Get main nutrients for display
-  const calories = recipe.nutrition.nutrients.find(
+  const calories = recipe.nutrition?.nutrients.find(
     (nutrient) => nutrient.name === "Calories"
   );
-  const protein = recipe.nutrition.nutrients.find(
+  const protein = recipe.nutrition?.nutrients.find(
     (nutrient) => nutrient.name === "Protein"
   );
-  const fat = recipe.nutrition.nutrients.find(
+  const fat = recipe.nutrition?.nutrients.find(
     (nutrient) => nutrient.name === "Fat"
   );
-  const carbs = recipe.nutrition.nutrients.find(
+  const carbs = recipe.nutrition?.nutrients.find(
     (nutrient) => nutrient.name === "Carbohydrates"
   );
 
   // Get ingredients list from nutrition data
-  const ingredients = recipe.nutrition.ingredients;
-
+  const ingredients = recipe.nutrition?.ingredients || [];
   // Get instructions
   const instructions = recipe.analyzedInstructions[0]?.steps || [];
 
@@ -158,8 +157,8 @@ const RecipeDetailScreen = () => {
           {/* Ingredients */}
           <View style={styles.ingredientsContainer}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
-            {ingredients.map((ingredient) => (
-              <View key={ingredient.id} style={styles.ingredientItem}>
+            {ingredients.map((ingredient, index) => (
+              <View key={index} style={styles.ingredientItem}>
                 <Ionicons name="chevron-forward" size={18} color="#ff4081" />
                 <Text style={styles.ingredientText}>
                   {ingredient.amount} {ingredient.unit} {ingredient.name}
@@ -172,7 +171,7 @@ const RecipeDetailScreen = () => {
           <View style={styles.instructionsContainer}>
             <Text style={styles.sectionTitle}>Instructions</Text>
             {instructions.length > 0 ? (
-              instructions.map((step) => (
+              instructions.map((step, index) => (
                 <View key={step.number} style={styles.instructionStep}>
                   <View style={styles.stepNumberContainer}>
                     <Text style={styles.stepNumber}>{step.number}</Text>
@@ -180,19 +179,30 @@ const RecipeDetailScreen = () => {
                   <View style={styles.stepContent}>
                     <Text style={styles.stepText}>{step.step}</Text>
                     
-                    {(step.ingredients.length > 0 || step.equipment.length > 0) && (
+                    {step.ingredients && (step.ingredients.length > 0 || step.equipment.length > 0) && (
                       <View style={styles.stepDetails}>
                         {step.ingredients.length > 0 && (
                           <Text style={styles.stepDetailsText}>
                             <Text style={styles.stepDetailsLabel}>Ingredients: </Text>
-                            {step.ingredients.map(i => i.name).join(", ")}
+                            {step.ingredients.map((ingredient, index) => {
+                                ingredient = ingredient.name
+                                return (
+                                  <Text key={index} style={{ color: '#333' }}>
+                                    {ingredient}{index < step.ingredients.length - 1 ? ', ' : ''}
+                                  </Text>
+                                );
+                            })}
                           </Text>
                         )}
                         
                         {step.equipment.length > 0 && (
                           <Text style={styles.stepDetailsText}>
                             <Text style={styles.stepDetailsLabel}>Equipment: </Text>
-                            {step.equipment.map(e => e.name).join(", ")}
+                            {step.equipment?.map((equip, index) => (
+                              <Text key={index} style={{ color: '#333' }}>
+                                {equip.name}{index < step.equipment.length - 1 ? ', ' : ''}
+                              </Text>
+                            ))}
                           </Text>
                         )}
                       </View>
@@ -228,9 +238,9 @@ const RecipeDetailScreen = () => {
                 <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>% Daily</Text>
               </View>
               
-              {recipe.nutrition.nutrients.map((nutrient, index) => (
+              {recipe && recipe.nutrition && recipe.nutrition.nutrients &&recipe.nutrition.nutrients.map((nutrient, index) => (
                 <View 
-                  key={nutrient.name} 
+                  key={index} 
                   style={[
                     styles.tableRow,
                     index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd

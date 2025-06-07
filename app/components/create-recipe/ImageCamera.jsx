@@ -1,30 +1,8 @@
 
-import { StyleSheet, Text, View, Alert, TouchableOpacity, Image } from 'react-native'
-import React, { useState } from 'react'
-import * as ImagePicker from "expo-image-picker"
-import { MaterialIcons, Ionicons } from '@expo/vector-icons'
+import { StyleSheet, Text, TouchableOpacity } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 
-const ImageCamera = () => {
-        const [image, setImage] = useState(null);
-        const [error, setError] = useState(null);
-
-        const takeImage = async () => {
-            const { status} = await ImagePicker.requestCameraPermissionsAsync();
-            if(status !== "granted") {
-                Alert.alert("Permission to access camera is required", `Sorry, we need camera 
-                        roll permission to upload images.`);
-                setError("Permission to access camera is required");
-                return;
-            }
-            else{
-                const result = await ImagePicker.launchCameraAsync();
-                if(!result.canceled){
-                    setImage(result.assets[0].uri)
-                    console.log(image)
-                    setError(null)
-                }
-            }
-        }
+const ImageCamera = (takeImage) => {
     
   return (
     <TouchableOpacity 

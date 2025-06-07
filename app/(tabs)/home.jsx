@@ -1,23 +1,28 @@
-import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
+import {StyleSheet } from "react-native"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 import Header from "./../components/home/Header"
-export default function HomeScreen() {
+import CreatedRecipes from "./../components/home/CreatedRecipes"
+
+function HomeScreen() {
   return (
     
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <SafeAreaProvider style={styles.container}>
         {/* Recipe Generation Hero */}
 
         <Header/>
         {/* Food, nutrition and diet tips Footer */}
+        <CreatedRecipes/>
         
-      </ScrollView>
+      </SafeAreaProvider>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 16,
     backgroundColor: "#F8F9FA",
   },
   
 })
+export default HomeScreen;

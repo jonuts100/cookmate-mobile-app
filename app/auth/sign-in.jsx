@@ -42,9 +42,9 @@ const SignInPage = () => {
       const user = userCredential.user;
       console.log(user);
       setLoading(false)
+      setUser(user)
       ToastAndroid.show("Success!", ToastAndroid.BOTTOM)
-      await getUserDetail()
-
+      router.push("/(tabs)/home")
     })
     .catch(e => {
       console.log(e)
@@ -53,12 +53,6 @@ const SignInPage = () => {
     })
   }
 
-  const getUserDetail = async () => {
-    const result = await getDoc(doc(db, "users", email));
-    console.log(result.data);
-    setUser(result.data);
-    router.push("/(tabs)/home")
-  }
   // Animation values
   const buttonScale = new Animated.Value(1)
 
