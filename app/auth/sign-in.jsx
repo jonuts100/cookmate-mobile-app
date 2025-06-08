@@ -137,7 +137,7 @@ const SignInPage = () => {
               onPress={SignInUser}
               activeOpacity={0.8}
             >
-              {loading ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.signInButtonText}>Sign In</Text>}
+              {loading ? <ActivityIndicator size="small" color="#f2ede0" /> : <Text style={styles.signInButtonText}>Sign In</Text>}
               
             </TouchableOpacity>
           </Animated.View>
@@ -149,23 +149,7 @@ const SignInPage = () => {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>or continue with</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Feather name="github" size={20} color="#333" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Feather name="twitter" size={20} color="#1DA1F2" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Feather name="facebook" size={20} color="#4267B2" />
-            </TouchableOpacity>
-          </View>
+          
         </View>
 
         
@@ -191,7 +175,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 8,
+    marginBottom: 2,
   },
   subtitle: {
     fontSize: 16,
@@ -213,9 +197,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#cbc7b7",
+    borderColor: "#f2ede0",
     borderRadius: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#f2ede0",
     paddingHorizontal: 16,
     height: 56,
     shadowColor: "#000",
@@ -225,7 +209,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   inputWrapperFocused: {
-    borderColor: "#FF6B6B",
+    borderColor: "#cc3300",
     borderWidth: 1.5,
     shadowOpacity: 0.1,
   },
@@ -246,23 +230,23 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 14,
-    color: "#FF6B6B",
+    color: "#cc3300",
     fontWeight: "600",
   },
   signInButton: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#cc3300",
     borderRadius: 12,
     height: 56,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#FF6B6B",
+    shadowColor: "#cc3300",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
   signInButtonText: {
-    color: "#fff",
+    color: "#f7f7f7",
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -290,7 +274,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#fff",
+    backgroundColor: "#f2ede0",
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 12,
@@ -315,7 +299,7 @@ const styles = StyleSheet.create({
   registerText: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#FF6B6B",
+    color: "#cc3300",
   },
 })
 

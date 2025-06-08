@@ -70,9 +70,9 @@ const Index = () => {
             <View style={{
                 borderRadius: 8,
                 borderWidth: 0.5,
-                borderColor: "#FF6B6B",
+                borderColor: "#cc3300",
                 paddingVertical: 16,
-                backgroundColor: "#FF6B6B"
+                backgroundColor: "#cc3300"
                 
             }}>
                 <Text style={{color: "#f8f9f0", textAlign: "center", fontWeight: "bold", fontSize: 16}}>
@@ -95,11 +95,11 @@ const Index = () => {
             <View style={{
                 borderRadius: 8,
                 borderWidth: 0.5,
-                borderColor: "#0d0d0d",
+                borderColor: "#666",
                 paddingVertical: 16,
                 
             }}>
-                <Text style={{color: "#0d0d0d", textAlign: "center", fontWeight: "bold", fontSize: 16}}>
+                <Text style={{color: "#666", textAlign: "center", fontWeight: "bold", fontSize: 16}}>
                     Sign in
                 </Text>
             </View>
@@ -115,9 +115,8 @@ export default Index
 
 const styles = StyleSheet.create({
   background: {
+    backgroundColor: "#f8f9f0",
     width: "100%",
-    borderRadius: 16,
-    marginTop: 40,
     position: "relative",
     flex: 1,
     justifyContent: 'center',
@@ -127,14 +126,14 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0d0d0d",
+    color: "#666",
     textAlign: "left"
   },
   headerText: {
     fontSize: 16,
     fontWeight: "light",
     marginTop: 5,
-    color: "#232d14",
+    color: "#666",
     textAlign: "left"
   }
 });

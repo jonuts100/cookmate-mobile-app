@@ -13,17 +13,23 @@ import {
   ScrollView,
   ToastAndroid,
 } from "react-native"
-import { Feather } from "@expo/vector-icons"
+import { Feather, MaterialIcons } from "@expo/vector-icons"
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { createUserWithEmailAndPassword} from "firebase/auth"
 import { auth, db } from "@/config/firebaseConfig"
 import { doc, setDoc } from "firebase/firestore"
 import { useContext } from "react"
 import { UserDetailContext } from "@/context/UserDetailContext"
 import { useRouter } from "expo-router"
+import * as ImagePicker from "expo-image-picker"
+import { Alert } from "react-native"
+import { Image } from "react-native"
 
 
 const SignUpPage = () => {
   const [fullName, setFullName] = useState("")
+  const [image, setImage] = useState(null)
+  const [error, setError] = useState(null)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -39,6 +45,31 @@ const SignUpPage = () => {
   
   const router = useRouter();
   const {setUser} = useContext(UserDetailContext)
+
+  const pickImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+        if(status !== "granted") {
+            Alert.alert("Permission to access media library is required", 
+                "Sorry, we need camera roll permission to upload images.")
+            setError("Permission to access media library is required")
+            return
+        }
+        else{
+            const result = await ImagePicker.launchImageLibraryAsync()
+            console.log(result)
+            if(!result.canceled){
+                console.log(result)
+                setImage(result.assets[0].uri)
+                setError(null)
+            }
+        }
+    }
+
+    const pickImageAgain = () => {
+      setImage(null)
+      pickImage()
+    }
   // creating new user
   const CreateNewUser = () => {
       createUserWithEmailAndPassword(auth, email, password)
@@ -111,6 +142,49 @@ const SignUpPage = () => {
           <Text style={styles.subtitle}>Sign up to get started</Text>
         </View>
 
+        <View style ={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+
+        }}>
+            <Text style={styles.inputLabel}>Profile</Text>
+           {image ? (
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: image }} style={styles.image} />
+                  <TouchableOpacity 
+                      style={styles.removeButton}
+                      onPress={() => setImage(null)}>
+                  </TouchableOpacity>
+              </View>
+            ) : (
+                <View style={{
+                    display: "flex",
+                    alignItems: "center",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    backgroundColor: "#f2ede0",
+                    width: 100,
+                    height: 100,
+                    borderWidth: 1,
+                    padding: 10,
+                    marginBottom: 15,
+                    borderRadius: 50,
+                    borderColor: "#e0e0e0",
+                    
+
+                }}>
+                  <TouchableOpacity 
+                        style={styles.removeButton}
+                        onPress={pickImage}
+                    >
+                    <AntDesign name="user" size={40} color="#666" />
+                  </TouchableOpacity>
+                </View>
+            )}
+
+          </View>
+
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Full Name</Text>
@@ -145,6 +219,8 @@ const SignUpPage = () => {
               />
             </View>
           </View>
+
+          
 
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Password</Text>
@@ -202,6 +278,7 @@ const SignUpPage = () => {
             </Text>
           </View>
 
+
           <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
             <TouchableOpacity
               style={styles.signUpButton}
@@ -212,26 +289,11 @@ const SignUpPage = () => {
               <Text style={styles.signUpButtonText}>Create Account</Text>
             </TouchableOpacity>
           </Animated.View>
-
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>or sign up with</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Feather name="github" size={20} color="#333" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Feather name="twitter" size={20} color="#1DA1F2" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Feather name="facebook" size={20} color="#4267B2" />
-            </TouchableOpacity>
-          </View>
+          
         </View>
 
+        
+        
         <View style={styles.footerContainer}>
           <Text style={styles.footerText}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
@@ -246,7 +308,26 @@ const SignUpPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#f8f9f0",
+    
+  },
+  imageContainer: {
+    position: 'relative',
+    borderRadius: 50,
+    overflow: 'hidden',
+    width: 100, // Adjusted width
+    height: 100,
+    borderWidth: 1,
+    borderColor: "#f2ede0",
+    marginBottom: 10,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  image: {
+      resizeMode: 'cover',
+      width: '100%',
+      height: '100%',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -260,6 +341,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: "#333",
+    marginTop: 40,
     marginBottom: 8,
   },
   subtitle: {
@@ -282,9 +364,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#e1e1e1",
+    borderColor: "#f2ede0",
     borderRadius: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#f2ede0",
     paddingHorizontal: 16,
     height: 56,
     shadowColor: "#000",
@@ -294,7 +376,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   inputWrapperFocused: {
-    borderColor: "#FF6B6B",
+    borderColor: "#cc3300",
     borderWidth: 1.5,
     shadowOpacity: 0.1,
   },
@@ -322,12 +404,12 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#FF6B6B",
+    borderColor: "#cc3300",
     justifyContent: "center",
     alignItems: "center",
   },
   checkboxChecked: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#cc3300",
   },
   termsText: {
     flex: 1,
@@ -335,16 +417,16 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   termsLink: {
-    color: "#FF6B6B",
+    color: "#cc3300",
     fontWeight: "600",
   },
   signUpButton: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#cc3300",
     borderRadius: 12,
     height: 56,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#FF6B6B",
+    shadowColor: "#cc3300",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -355,42 +437,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 30,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e1e1e1",
-  },
-  dividerText: {
-    paddingHorizontal: 16,
-    color: "#666",
-    fontSize: 14,
-  },
-  socialButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 24,
-  },
-  socialButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
-  },
+
   footerContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -401,9 +448,10 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   signInText: {
+    
     fontSize: 14,
     fontWeight: "bold",
-    color: "#FF6B6B",
+    color: "#cc3300",
   },
 })
 
