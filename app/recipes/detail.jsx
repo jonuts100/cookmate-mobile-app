@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -15,9 +15,32 @@ import { Ionicons } from '@expo/vector-icons';
 import HTML from 'react-native-render-html';
 import Collapsible from 'react-native-collapsible';
 import { UserDetailContext } from '@/context/UserDetailContext';
+import { db } from '@/config/firebaseConfig';
+import { addDoc, doc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import CircularProgress from 'react-native-circular-progress-indicator';
 
 const RecipeDetailScreen = () => {
-  const { recipe } = useContext(UserDetailContext);
+  const { user, recipe } = useContext(UserDetailContext);
+
+  const checkIfRecipeIsSaved = async () => {
+    try {
+      const savedRecipesRef = collection(db, 'savedRecipes');
+      const q = query(
+        savedRecipesRef,
+        where('user', '==', user.email),
+        where('recipeTitle', '==', recipe.title) // or 'recipe.id' if more unique
+      );
+
+      const querySnapshot = await getDocs(q);
+      setIsSaved(!querySnapshot.empty);
+    } catch (error) {
+      console.error("Error checking saved recipe:", error);
+    }
+  };
+
+  useEffect(() => {
+    checkIfRecipeIsSaved();
+  }, [user, recipe]);
  
   const [isSaved, setIsSaved] = useState(false);
   const [isNutritionExpanded, setIsNutritionExpanded] = useState(false);
@@ -60,17 +83,70 @@ const RecipeDetailScreen = () => {
     </View>
   );
 
+  const addRecipeToSaved = async () => {
+    
+    try {
+      const recipeCollectionRef = collection(db, 'recipes')
+      const recipeQuery = query(recipeCollectionRef, where('title', '==', recipe.title))
+      const recipeSnapshot = await getDocs(recipeQuery);
+
+      if (recipeSnapshot.empty) {
+        // Recipe does not exist yet, so add it
+        await addDoc(recipeCollectionRef, recipe);
+      }
+     
+      await addDoc(collection(db, 'savedRecipes'), {
+        recipeData: recipe,
+        recipeTitle: recipe.title,
+        user: user.email,
+        savedOn: new Date().toISOString(),
+      })
+      setIsSaved(true);
+      alert("Recipe saved successfully!");
+    }
+    catch (error) {
+      console.error("Error saving recipe:", error);
+      
+    }
+  }
+
+  const removeRecipeFromSaved = async () => {
+    
+    try {
+      const savedRecipesRef = collection(db, 'savedRecipes')
+      const queryRecipe = query(
+        savedRecipesRef,
+        where("recipeId", "==", recipe.id),
+        where("userId", "==", user.uid)
+      )
+      const querySnapshot = await getDocs(queryRecipe)
+      querySnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+
+      setIsSaved(false);
+      alert("Recipe removed from saved recipes.");
+    } catch (error) {
+      console.error("Error removing saved recipe:", error);
+      
+    }
+  }
+
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="auto" />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Recipe Header */}
         <View style={styles.header}>
-          <Image
-            source={{ uri: recipe.image || 'https://via.placeholder.com/600x400' }}
-            style={styles.recipeImage}
-            resizeMode="cover"
-          />
+          {recipe.image && (
+            <Image
+              source={{ uri: recipe.image  }}
+              style={styles.recipeImage}
+              resizeMode="cover"
+            />
+
+          )}
           
           <View style={styles.titleContainer}>
             <Text style={styles.title}>{recipe.title}</Text>
@@ -80,7 +156,7 @@ const RecipeDetailScreen = () => {
                 styles.saveButton, 
                 isSaved && styles.savedButton
               ]} 
-              onPress={() => setIsSaved(!isSaved)}
+              onPress={!isSaved ? addRecipeToSaved : removeRecipeFromSaved}
             >
               <Ionicons 
                 name={isSaved ? "heart" : "heart-outline"} 
@@ -129,29 +205,51 @@ const RecipeDetailScreen = () => {
         {/* Nutrition Card */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Nutrition Information</Text>
-          <View style={styles.nutrientGrid}>
-            <NutrientCard 
-              label="Calories" 
-              value={calories ? Math.round(calories.amount) : "N/A"} 
-              unit={calories?.unit || ""} 
-            />
-            <NutrientCard 
-              label="Protein" 
-              value={protein ? Math.round(protein.amount) : "N/A"} 
-              unit={protein?.unit || ""} 
-            />
-            <NutrientCard 
-              label="Carbs" 
-              value={carbs ? Math.round(carbs.amount) : "N/A"} 
-              unit={carbs?.unit || ""} 
-            />
-            <NutrientCard 
-              label="Fat" 
-              value={fat ? Math.round(fat.amount) : "N/A"} 
-              unit={fat?.unit || ""} 
-            />
-          </View>
+          {[protein, fat, carbs, calories].map((nutrient, index) => {
+            if (!nutrient) return null;
+            const percentage = Math.round(nutrient.percentOfDailyNeeds);
+            const amount = Math.round(nutrient.amount * 10) / 10;
+            const unit = nutrient.unit;
+            const name = nutrient.name;
+            return (
+              <View style={styles.nutrientGrid} key={index}>
+                <View style={{
+                    width: '40%',
+                    maxHeight: 100,
+                    display: 'flex',
+                    padding: 10,
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: 10,
+                    marginBottom: 10,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    gap: 3,
+                }}>
+                <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 3 }}>{name === "Carbohydrates" ? 'Carbs' : name}</Text>
+                <Text style={{ fontSize: 10, color: '#666' }}>{amount} {unit}</Text>
+                <CircularProgress
+                    value={percentage}
+                    valueSuffix='%'
+                    maxValue={100}
+                    radius={20}
+                    activeStrokeColor="#FF6B6B"
+                    inActiveStrokeColor="#e0e0e0"
+                    inActiveStrokeOpacity={0.5}
+                    progressValueStyle={{ color: '#333', fontSize: 12 }}
+                    showProgressValue={true}
+                    duration={1000}
+                />
+                </View>
+            </View>
+            
+            )}
+          )}
         </View>
+          
 
         <View style={styles.contentContainer}>
           {/* Ingredients */}
@@ -215,7 +313,6 @@ const RecipeDetailScreen = () => {
             )}
           </View>
         </View>
-
         {/* Detailed Nutrition */}
         <View style={styles.detailedNutritionContainer}>
           <TouchableOpacity 

@@ -161,8 +161,6 @@ Respond ONLY with a valid JSON object like this (no markdown, no commentary):
 \`\`\`json
 {
   "recipe": {
-    "image": "<food_image_url>",
-    "imageType": "jpg",
     "title": "<recipe name>",
     "readyInMinutes": <number>,
     "servings": ${servings},

@@ -1,13 +1,44 @@
-import { useState } from "react"
+import { useEffect, useState, useContext } from "react"
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { BookBookmark, GridFour, List } from "phosphor-react-native"
 import RecipeCard from "../components/recipe-card"
-import { mockRecipes } from "@/constants/data"
-
+import { db } from "@/config/firebaseConfig"
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore"
+import { UserDetailContext } from "@/context/UserDetailContext"
 export default function SavedScreen() {
+  const { user } = useContext(UserDetailContext)
+  const [userSavedRecipes, setSavedRecipes] = useState([])
   const [viewMode, setViewMode] = useState("grid")
-  const savedRecipes = mockRecipes.filter((_, index) => index % 2 === 0) // Mock saved recipes
+  
+  const fetchSavedRecipes = async () => {
+  try {
+    const collectionRef = collection(db, 'savedRecipes')
+    const queryRef = query(
+      collectionRef,
+      where('user', '==', user.email),
+      orderBy("savedOn", "desc")
+    )
+    const querySnapshot = await getDocs(queryRef)
+    
+    const recipesData = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data().recipeData,   // This gets the full recipe details
+      savedOn: doc.data().savedOn,
+    }))
+
+    setSavedRecipes(recipesData)
+  } catch (error) {
+    console.error("Error fetching saved recipes: ", error)
+  }
+}
+
+  useEffect(() => {
+    console.log(userSavedRecipes)
+    fetchSavedRecipes()
+    
+  }, [])
+
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
@@ -42,17 +73,18 @@ export default function SavedScreen() {
         </View>
       </View>
 
-      {savedRecipes.length === 0 ? (
+      {userSavedRecipes.length === 0 ? (
         renderEmptyState()
       ) : (
         <FlatList
-          data={savedRecipes}
+          data={userSavedRecipes}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <RecipeCard
               recipe={item}
               style={viewMode === "grid" ? styles.gridCard : styles.listCard}
               layout={viewMode}
+              
             />
           )}
           numColumns={viewMode === "grid" ? 2 : 1}

@@ -194,10 +194,10 @@ export default function SearchScreen() {
     if (!searchQuery) {
       return (
         <View style={styles.centerContainer}>
-          <Image
+          {/* <Image
             source={{ uri: "https://cdn-icons-png.flaticon.com/512/3480/3480710.png" }}
             style={{ width: 100, height: 100, marginBottom: 16, opacity: 0.7 }}
-          />
+          /> */}
           <Text style={styles.emptyText}>Search for recipes</Text>
           <Text style={styles.emptySubtext}>Find delicious recipes by name, ingredient, or cuisine</Text>
         </View>

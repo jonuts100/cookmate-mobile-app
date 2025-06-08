@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, Pressable, SafeAreaView, StyleSheet, Text, View, Dimensions } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, SafeAreaView, StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import { db } from '@/config/firebaseConfig';
 import { UserDetailContext } from "@/context/UserDetailContext";
@@ -51,7 +51,7 @@ const CreatedRecipes = () => {
     if (isLoading) {
         return (
             <View style={styles.centered}>
-                <ActivityIndicator size="large" color="#007AFF" />
+                <ActivityIndicator size="large" color="#FF6B6B" />
                 <Text style={styles.loadingText}>Loading Recipes...</Text>
             </View>
         );
@@ -67,63 +67,66 @@ const CreatedRecipes = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.header}>All Recipes</Text>
-            <FlatList
-                data={allRecipes}
-                keyExtractor={item => item.id}
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                // Add padding to the container of the list itself
-                contentContainerStyle={styles.listContentContainer}
-                renderItem={({ item }) => (
-                    <Pressable style={styles.recipeItem} onPress={() => goToRecipePage(item)}>
-                        <Text style={styles.recipeTitle} numberOfLines={2}>{item.title}</Text>
-                        {/* Render cuisines as tags */}
-                        <View style={styles.badgeContainer}>
-                            {item.cuisines?.map((cuisine, index) => (
-                                <View key={index} style={styles.badgeTag}>
-                                    <Text style={styles.badgeText}>{cuisine}</Text>
-                                </View>
-                            ))}
-                            <View style={styles.badgeTag}>
-                                <Text style={styles.badgeText}>
-                                    {item.diets?.length > 0 ? item.diets[0] : 'No specific diets'}
-                                </Text>
-                            </View>
-                            <View style={styles.badgeTag}>
-                                <Text style={styles.badgeText}>
-                                    {item.readyInMinutes ? `${item.readyInMinutes} min` : 'No time specified'}
-                                </Text>
-                            </View>
-                            
-                        </View>
-                        
-                        {/* Show nutrition information if available */}
-                        {item.nutrition && item.nutrition.nutrients && (
-                            // container of 2x2
-                                
-                            <View style={{ 
-                                display: 'flex', flexDirection: 'row', gap: 10, marginVertical: 10, flexWrap: 'wrap',
-                                justifyContent: 'space-between', alignItems: 'center', maxWidth: '100%', maxHeight: 300,
-                                 padding: 10, backgroundColor: '#f8f9fa', borderRadius: 10,
-                            }}>
-                                {item.nutrition.nutrients.slice(0,4).map((nutrient, index) => (
-                                    <NutritionInfoBlock
-                                        key={index}
-                                        name={nutrient.name}
-                                        amount={nutrient.amount}
-                                        unit={nutrient.unit}
-                                        percentage={nutrient.percentOfDailyNeeds}
-                                    />
+            <Text style={styles.header}>Generated Recipes</Text>
+            {allRecipes.length === 0 ? (
+                <View style={styles.centered}>
+                    <Text style={styles.emptyMessage}>
+                        You have not generated any recipes yet.
+                    </Text>
+                    <TouchableOpacity
+                        style={styles.generateButton}
+                        onPress={() => router.push('/screens/create-recipe')}
+                    >
+                        <Text style={styles.generateButtonText}>
+                            Ask AI for recipes
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <FlatList
+                    data={allRecipes}
+                    keyExtractor={item => item.id.toString()}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.listContentContainer}
+                    renderItem={({ item }) => (
+                        <Pressable style={styles.recipeItem} onPress={() => goToRecipePage(item)}>
+                            <Text style={styles.recipeTitle} numberOfLines={2}>{item.title}</Text>
+                            <View style={styles.badgeContainer}>
+                                {item.cuisines?.map((cuisine, index) => (
+                                    <View key={index} style={styles.badgeTag}>
+                                        <Text style={styles.badgeText}>{cuisine}</Text>
+                                    </View>
                                 ))}
+                                <View style={styles.badgeTag}>
+                                    <Text style={styles.badgeText}>
+                                        {item.diets?.length > 0 ? item.diets[0] : 'No specific diets'}
+                                    </Text>
+                                </View>
+                                <View style={styles.badgeTag}>
+                                    <Text style={styles.badgeText}>
+                                        {item.readyInMinutes ? `${item.readyInMinutes} min` : 'No time specified'}
+                                    </Text>
+                                </View>
                             </View>
-                        )}
 
-                        
-                        
-                    </Pressable>
-                )}
-            />
+                            {item.nutrition && item.nutrition.nutrients && (
+                                <View style={styles.nutritionContainer}>
+                                    {item.nutrition.nutrients.slice(0, 4).map((nutrient, index) => (
+                                        <NutritionInfoBlock
+                                            key={index}
+                                            name={nutrient.name}
+                                            amount={nutrient.amount}
+                                            unit={nutrient.unit}
+                                            percentage={nutrient.percentOfDailyNeeds}
+                                        />
+                                    ))}
+                                </View>
+                            )}
+                        </Pressable>
+                    )}
+                />
+            )}
         </SafeAreaView>
     );
 };
@@ -137,9 +140,8 @@ const cardWidth = screenWidth * 0.75;
 
 const styles = StyleSheet.create({
     container: {
-        display: 'flex',
-        flex: 0.8,
-        backgroundColor: '#F8F9FA', // A light background color for the whole screen
+        flex: 1,
+        backgroundColor: '#fdfdfd',
     },
     centered: {
         flex: 1,
@@ -147,69 +149,85 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
     },
-    loadingText: {
-        marginTop: 10,
-        fontSize: 16,
+    emptyMessage: {
+        fontSize: 18,
         color: '#6c757d',
-    },
-    errorText: {
-        color: '#dc3545',
         textAlign: 'center',
+        marginBottom: 24,
+    },
+    generateButton: {
+        backgroundColor: '#FF6B6B',
+        paddingVertical: 14,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    generateButtonText: {
+        color: '#fff',
         fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     header: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: 'bold',
         marginTop: 20,
         marginBottom: 10,
-        paddingHorizontal: 16, // Align header with list container padding
+        paddingHorizontal: 20,
     },
     listContentContainer: {
-        paddingHorizontal: 8,
-        paddingVertical: 10, // Adds some vertical space for the cards' shadow
+        paddingHorizontal: 10,
+        paddingVertical: 10,
     },
     recipeItem: {
         backgroundColor: '#fff',
-        borderRadius: 16, // More rounded corners
-        padding: 16,
-        // Set the width of the card dynamically
+        borderRadius: 20,
+        padding: 20,
         width: cardWidth,
-        // Add horizontal margin for spacing between cards (8+8 = 16px gap)
-        marginHorizontal: 8,
-        // Nice shadow for iOS
+        marginHorizontal: 10,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
-            height: 4,
+            height: 2,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        // Shadow for Android
-        elevation: 5,
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+        elevation: 6,
     },
     recipeTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#212529',
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 12,
     },
     badgeContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        marginTop: 'auto', // Pushes the tags to the bottom of the card
+        gap: 8,
+        marginBottom: 15,
     },
     badgeTag: {
-        backgroundColor: '#e9ecef',
-        borderRadius: 16,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 15,
         paddingVertical: 6,
         paddingHorizontal: 12,
-        marginRight: 4,
-        marginTop: 4,
     },
     badgeText: {
         fontSize: 12,
         fontWeight: '500',
-        color: '#495057',
+        color: '#555',
+    },
+    nutritionContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginTop: 10,
+        padding: 15,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 15,
     }
 });

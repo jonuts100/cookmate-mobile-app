@@ -77,17 +77,16 @@ const CreateRecipeScreen = () => {
             if (!match) {
                 throw new Error("No valid JSON object found in caption.")
             }
-            console.log("Raw Recipe Result:", RESULT)
-            // Extract the first match which should be the JSON object
-            console.log("Matched JSON:", match[0])
+            //console.log("Raw Recipe Result:", RESULT)
+            //console.log("Matched JSON:", match[0])
             const rp = match[0]
             const parsedRecipes = JSON.parse(rp)
 
             const recipe = parsedRecipes.recipe
-            console.log("Parsed Recipe:", recipe)
+            //console.log("Parsed Recipe:", recipe)
             if (recipe) {
-                console.log("Generated Recipe:", recipe);
-                console.log("User:", user?.email);
+                //console.log("Generated Recipe:", recipe);
+                //console.log("User:", user?.email);
                 await addDoc(collection(db, "recipes"), {
                     ...recipe,
                     createdOn: Date.now(),
@@ -152,12 +151,12 @@ const CreateRecipeScreen = () => {
         }
         
         try {
-            console.log("Image URI being sent to Gemini:", image)
+            //console.log("Image URI being sent to Gemini:", image)
             
             const caption = await generateImageCaption(image)
 
             if (caption) {
-                console.log("Generated Caption:", caption)
+                //console.log("Generated Caption:", caption)
                 const match = caption.match(/{[\s\S]*}/)
 
                 if (!match) {

@@ -13,6 +13,8 @@ const NutritionInfoBlock = ({name, amount, unit, percentage}) => {
     return (
         <View style={{
             width: '40%',
+            maxHeight: 100,
+            display: 'flex',
             padding: 10,
             backgroundColor: '#f8f9fa',
             borderRadius: 10,
@@ -25,7 +27,7 @@ const NutritionInfoBlock = ({name, amount, unit, percentage}) => {
             flexDirection: 'column',
             gap: 3,
         }}>
-            <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 3 }}>{name == "Carbohydrates" ? 'Carbs' : name}</Text>
+            <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 3 }}>{name === "Carbohydrates" ? 'Carbs' : name}</Text>
             <Text style={{ fontSize: 10, color: '#666' }}>{amount} {unit}</Text>
             <CircularProgress
                 value={percentage}
