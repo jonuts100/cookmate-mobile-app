@@ -12,18 +12,17 @@ import CircularProgress from 'react-native-circular-progress-indicator';
 const NutritionInfoBlock = ({name, amount, unit, percentage}) => {
     return (
         <View style={{
-            width: '40%',
+            width: '50%',
             maxHeight: 100,
             display: 'flex',
             padding: 10,
-            backgroundColor: '#f8f9fa',
-            borderRadius: 10,
-            marginBottom: 10,
-            shadowColor: '#000',
+            backgroundColor: '#f2ede3',
+            borderRadius: 4,
+            shadowColor: '#666',
             shadowOffset: { width: 0, height: 2 },
-            
+            elevation: 1,
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'flex-start',
             flexDirection: 'column',
             gap: 3,
         }}>
@@ -34,12 +33,12 @@ const NutritionInfoBlock = ({name, amount, unit, percentage}) => {
                 valueSuffix='%'
                 maxValue={100}
                 radius={20}
-                activeStrokeColor="#FF6B6B"
-                inActiveStrokeColor="#e0e0e0"
-                inActiveStrokeOpacity={0.5}
-                progressValueStyle={{ color: '#333', fontSize: 12 }}
+                activeStrokeColor="#cc3300"
+                inActiveStrokeColor="#e0aeae"
+                inActiveStrokeOpacity={0.3}
+                progressValueStyle={{ color: '#333', fontSize: 11 }}
                 showProgressValue={true}
-                duration={1000}
+                duration={800}
             />
         </View>
     )

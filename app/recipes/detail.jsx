@@ -71,18 +71,6 @@ const RecipeDetailScreen = () => {
     </View>
   );
 
-  const NutrientCard = ({ 
-    label, 
-    value, 
-    unit 
-  }) => (
-    <View style={styles.nutrientCard}>
-      <Text style={styles.nutrientLabel}>{label}</Text>
-      <Text style={styles.nutrientValue}>{value}</Text>
-      <Text style={styles.nutrientUnit}>{unit}</Text>
-    </View>
-  );
-
   const addRecipeToSaved = async () => {
     
     try {
@@ -161,7 +149,7 @@ const RecipeDetailScreen = () => {
               <Ionicons 
                 name={isSaved ? "heart" : "heart-outline"} 
                 size={18} 
-                color={isSaved ? "white" : "#ff4081"} 
+                color={isSaved ? "white" : "#cc3300"} 
               />
               <Text style={[
                 styles.saveButtonText, 
@@ -204,51 +192,57 @@ const RecipeDetailScreen = () => {
 
         {/* Nutrition Card */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Nutrition Information</Text>
-          {[protein, fat, carbs, calories].map((nutrient, index) => {
-            if (!nutrient) return null;
-            const percentage = Math.round(nutrient.percentOfDailyNeeds);
-            const amount = Math.round(nutrient.amount * 10) / 10;
-            const unit = nutrient.unit;
-            const name = nutrient.name;
-            return (
-              <View style={styles.nutrientGrid} key={index}>
-                <View style={{
-                    width: '40%',
-                    maxHeight: 100,
-                    display: 'flex',
-                    padding: 10,
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: 10,
-                    marginBottom: 10,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'column',
-                    gap: 3,
-                }}>
-                <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 3 }}>{name === "Carbohydrates" ? 'Carbs' : name}</Text>
-                <Text style={{ fontSize: 10, color: '#666' }}>{amount} {unit}</Text>
-                <CircularProgress
-                    value={percentage}
-                    valueSuffix='%'
-                    maxValue={100}
-                    radius={20}
-                    activeStrokeColor="#FF6B6B"
-                    inActiveStrokeColor="#e0e0e0"
-                    inActiveStrokeOpacity={0.5}
-                    progressValueStyle={{ color: '#333', fontSize: 12 }}
-                    showProgressValue={true}
-                    duration={1000}
-                />
-                </View>
-            </View>
-            
-            )}
-          )}
+  <Text style={styles.sectionTitle}>Nutrition Information</Text>
+  
+  <View style={styles.nutrientGrid}>
+    {[protein, fat, carbs, calories].map((nutrient, index) => {
+      if (!nutrient) return null;
+      const percentage = Math.round(nutrient.percentOfDailyNeeds);
+      const amount = Math.round(nutrient.amount * 10) / 10;
+      const unit = nutrient.unit;
+      const name = nutrient.name;
+      return (
+        <View
+          style={{
+            width: '45%',
+            maxHeight: 100,
+            display: 'flex',
+            padding: 10,
+            backgroundColor: '#f2ede2',
+            elevation: 2,
+            borderRadius: 10,
+            margin: 5,
+            shadowColor: '#666',
+            shadowOffset: { width: 0, height: 2 },
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: 3,
+          }}
+          key={index}
+        >
+          <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 3 }}>
+            {name === "Carbohydrates" ? 'Carbs' : name}
+          </Text>
+          <Text style={{ fontSize: 10, color: '#666' }}>{amount} {unit}</Text>
+          <CircularProgress
+            value={percentage}
+            valueSuffix='%'
+            maxValue={100}
+            radius={20}
+            activeStrokeColor="#cc3300"
+            inActiveStrokeColor="#e0aeae"
+            inActiveStrokeOpacity={0.3}
+            progressValueStyle={{ color: '#333', fontSize: 11 }}
+            showProgressValue={true}
+            duration={800}
+          />
         </View>
+      );
+    })}
+  </View>
+</View>
+
           
 
         <View style={styles.contentContainer}>
@@ -257,7 +251,7 @@ const RecipeDetailScreen = () => {
             <Text style={styles.sectionTitle}>Ingredients</Text>
             {ingredients.map((ingredient, index) => (
               <View key={index} style={styles.ingredientItem}>
-                <Ionicons name="chevron-forward" size={18} color="#ff4081" />
+                <Ionicons name="chevron-forward" size={18} color="#cc3300" />
                 <Text style={styles.ingredientText}>
                   {ingredient.amount} {ingredient.unit} {ingredient.name}
                 </Text>
@@ -360,7 +354,7 @@ const RecipeDetailScreen = () => {
         <View style={styles.sourceContainer}>
           <Text style={styles.sourceText}>
             Recipe from{" "}
-            <Text style={styles.sourceLink}>{recipe.sourceName}</Text>
+            <Text style={styles.sourceLink}>{recipe.sourceName ? recipe.sourceName: recipe.creditsText}</Text>
           </Text>
         </View>
       </ScrollView>
@@ -371,7 +365,9 @@ const RecipeDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9f0',
+    marginTop: 50,
+    borderRadius: 32,
   },
   header: {
     width: '100%',
@@ -381,7 +377,8 @@ const styles = StyleSheet.create({
     height: 250,
   },
   titleContainer: {
-    padding: 16,
+    marginTop: 12,
+    padding: 20,
   },
   title: {
     fontSize: 24,
@@ -393,7 +390,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'transparent',
-    borderColor: '#ff4081',
+    borderColor: '#cc3300',
     borderWidth: 1,
     borderRadius: 20,
     paddingVertical: 6,
@@ -402,11 +399,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   savedButton: {
-    backgroundColor: '#ff4081',
-    borderColor: '#ff4081',
+    backgroundColor: '#cc3300',
+    borderColor: '#cc3300',
   },
   saveButtonText: {
-    color: '#ff4081',
+    color: '#cc3300',
     marginLeft: 4,
     fontSize: 14,
     fontWeight: '500',
@@ -458,7 +455,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: '#f2ede0',
     borderRadius: 8,
     padding: 16,
     margin: 16,
@@ -481,16 +478,17 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   nutrientGrid: {
+    display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   nutrientCard: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f2ede0',
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
-    width: '48%',
+    width: '40%',
     marginBottom: 12,
   },
   nutrientLabel: {
@@ -533,20 +531,20 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#cc3333',
   },
   stepNumberContainer: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#ff4081',
+    backgroundColor: '#f2ede0',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
     marginTop: 2,
   },
   stepNumber: {
-    color: 'white',
+    color: '#cc3333',
     fontWeight: 'bold',
     fontSize: 14,
   },
@@ -555,7 +553,7 @@ const styles = StyleSheet.create({
   },
   stepText: {
     fontSize: 14,
-    color: '#333',
+    color: '#cc3333',
     lineHeight: 20,
   },
   stepDetails: {
@@ -592,7 +590,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f2ede0',
     paddingVertical: 10,
     paddingHorizontal: 12,
   },
@@ -627,7 +625,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   sourceLink: {
-    color: '#ff4081',
+    color: '#cc3300',
   },
 });
 

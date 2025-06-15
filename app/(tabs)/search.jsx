@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback, useRef, useContext } from "react"
 import {
   StyleSheet,
   Text,
@@ -11,13 +11,17 @@ import {
   Animated,
   Image,
   Platform,
+  Pressable,
+  Dimensions
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { MagnifyingGlass, X, Funnel } from "phosphor-react-native"
-import RecipeCard from "../components/recipe-card"
 import { fetchRecipes } from "../services/api"
 import { dishTypeOptions, cuisineOptions, dietOptions, intoleranceOptions } from "@/constants/data"
 import { BlurView } from "expo-blur"
+import NutritionInfoBlock from "../components/nutrition-block"
+import { UserDetailContext } from "@/context/UserDetailContext"
+import { useRouter } from "expo-router"
 
 export default function SearchScreen() {
   const [showFilters, setShowFilters] = useState(false)
@@ -26,7 +30,8 @@ export default function SearchScreen() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
-
+  const { setRecipe } = useContext(UserDetailContext);
+  const router = useRouter()
   // Filters
   const [selectedDishTypes, setSelectedDishTypes] = useState([])
   const [selectedCuisines, setSelectedCuisines] = useState([])
@@ -138,11 +143,19 @@ export default function SearchScreen() {
     )
   }
 
+    const goToRecipePage = (recipe) => {
+        // This function now correctly receives the recipe object
+        if (setRecipe) {
+            setRecipe(recipe);
+        }
+        router.push("/recipes/detail");
+    };
+
   const renderEmptyState = () => {
     if (isLoading) {
       return (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#FF6B6B" />
+          <ActivityIndicator size="large" color="#cc3300" />
           <Text style={styles.loadingText}>Finding delicious recipes...</Text>
         </View>
       )
@@ -264,12 +277,47 @@ export default function SearchScreen() {
         {recipes.length > 0 ? (
           <FlatList
             data={recipes}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => <RecipeCard recipe={item} style={styles.resultCard} />}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.resultsGrid}
-            numColumns={1}
-          />
+            keyExtractor={item => item.id.toString()}
+            horizontal={false}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.listContentContainer}
+            renderItem={({ item }) => (
+                <Pressable style={styles.recipeItem} onPress={() => goToRecipePage(item)}>
+                    <Text style={styles.recipeTitle} numberOfLines={2}>{item.title}</Text>
+                    <View style={styles.badgeContainer}>
+                        {item.cuisines?.map((cuisine, index) => (
+                            <View key={index} style={styles.badgeTag}>
+                                <Text style={styles.badgeText}>{cuisine}</Text>
+                            </View>
+                        ))}
+                        <View style={styles.badgeTag}>
+                            <Text style={styles.badgeText}>
+                                {item.diets?.length > 0 ? item.diets[0] : 'No specific diets'}
+                            </Text>
+                        </View>
+                        <View style={styles.badgeTag}>
+                            <Text style={styles.badgeText}>
+                                {item.readyInMinutes ? `${item.readyInMinutes} min` : 'No time specified'}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {item.nutrition && item.nutrition.nutrients && (
+                        <View style={styles.nutritionContainer}>
+                            {item.nutrition.nutrients.slice(0, 4).map((nutrient, index) => (
+                                <NutritionInfoBlock
+                                    key={index}
+                                    name={nutrient.name}
+                                    amount={nutrient.amount}
+                                    unit={nutrient.unit}
+                                    percentage={nutrient.percentOfDailyNeeds}
+                                />
+                            ))}
+                        </View>
+                    )}
+                </Pressable>
+            )}
+        />
         ) : (
           renderEmptyState()
         )}
@@ -331,11 +379,14 @@ export default function SearchScreen() {
     </SafeAreaView>
   )
 }
-
+// Get the width of the screen
+const { width: screenWidth } = Dimensions.get('window');
+// Set the width of the card to be 75% of the screen width
+const cardWidth = screenWidth * 0.9
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#f8f9f0",
   },
   header: {
     flexDirection: "row",
@@ -344,7 +395,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: "#f2ede0",
   },
   backButton: {
     width: 40,
@@ -356,25 +407,26 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: "#666",
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 6,
-    backgroundColor: "#FFF",
+    backgroundColor: "#f8f9f0",
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: "#f2ede0",
   },
   searchInputContainer: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#f2ede0",
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 48,
+    elevation: 1,
   },
   searchIcon: {
     marginRight: 8,
@@ -383,7 +435,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 48,
     fontSize: 16,
-    color: "#333",
+    color: "#666",
   },
   clearButton: {
     padding: 6,
@@ -393,12 +445,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#f2ede0",
     justifyContent: "center",
     alignItems: "center",
   },
   filterButtonActive: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#cc3300",
   },
   filterBadge: {
     position: "absolute",
@@ -407,22 +459,23 @@ const styles = StyleSheet.create({
     minWidth: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#cc3300",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 4,
   },
   filterBadgeText: {
-    color: "#FFF",
+    color: "#f7f7f7",
     fontSize: 10,
     fontWeight: "bold",
   },
   resultsContainer: {
     flex: 1,
-    padding: 16,
   },
   resultsTitleContainer: {
     marginBottom: 16,
+    paddingLeft: 16,
+    paddingTop: 16,
   },
   resultsTitle: {
     fontSize: 20,
@@ -469,14 +522,14 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#FF6B6B",
+    color: "#cc3300",
     textAlign: "center",
     marginBottom: 16,
   },
   retryButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#cc3300",
     borderRadius: 12,
   },
   retryButtonText: {
@@ -551,7 +604,7 @@ const styles = StyleSheet.create({
   },
   clearFiltersText: {
     fontSize: 14,
-    color: "#FF6B6B",
+    color: "#cc3300",
     fontWeight: "600",
   },
   filtersScrollView: {
@@ -582,8 +635,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
   },
   filterItemSelected: {
-    backgroundColor: "#FF6B6B",
-    borderColor: "#FF6B6B",
+    backgroundColor: "#cc3300",
+    borderColor: "#cc3300",
   },
   filterItemText: {
     fontSize: 14,
@@ -598,7 +651,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   applyFiltersButton: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#cc3300",
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
@@ -608,4 +661,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+
+  listContentContainer: {
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        gap: 12
+    },
+  recipeItem: {
+        backgroundColor: '#f2ede0',
+        borderRadius: 20,
+        padding: 20,
+        width: cardWidth,
+        marginHorizontal: 10,
+        elevation: 1,
+    },
+    recipeTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#cc3300',
+        marginBottom: 12,
+    },
+    badgeContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginBottom: 15,
+    },
+    badgeTag: {
+        backgroundColor: '#f8f9f0',
+        borderRadius: 15,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    badgeText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#6c757d',
+    },
+    nutritionContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginTop: 10,
+        padding: 15,
+        backgroundColor: '#f2ede0',
+        borderRadius: 15,
+    }
 })

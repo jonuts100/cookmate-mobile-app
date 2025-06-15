@@ -214,7 +214,7 @@ const CreateRecipeScreen = () => {
             }}
         >
             <View style={styles.headerContainer}>
-                <Text style={styles.header}>What are we cooking with?</Text>
+                <Text style={styles.header}>Generate Recipe</Text>
                 <Text style={styles.subHeader}>Upload a photo of your ingredients</Text>
             </View>
 
@@ -235,19 +235,28 @@ const CreateRecipeScreen = () => {
                     </View>
                 )}
                 
-                <TouchableOpacity 
-                    style={[styles.controlButton, styles.galleryButton]}
-                    onPress={pickImage}>
-                    <Ionicons name="images-outline" size={22} color="#FFFFFF" />
-                    <Text style={styles.buttonText}>Gallery</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                    style={[styles.controlButton, styles.cameraButton]}
-                    onPress={takeImage}>
-                    <Ionicons name="camera-outline" size={22} color="#FFFFFF" />
-                    <Text style={styles.buttonText}>Camera</Text>
-                </TouchableOpacity>
+                <View style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    gap: 8,
+                    alignContent: 'center'
+                }}>
+
+                    <TouchableOpacity 
+                        style={[styles.controlButton, styles.galleryButton]}
+                        onPress={pickImage}>
+                        <Ionicons name="images-outline" size={22} color="#cc3300" />
+                        <Text style={styles.buttonTextReversed}>Gallery</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                        style={[styles.controlButton, styles.cameraButton]}
+                        onPress={takeImage}>
+                        <Ionicons name="camera-outline" size={22} color="#cc3300" />
+                        <Text style={styles.buttonTextReversed}>Camera</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {error && <Text style={styles.errorText}>{error}</Text>}
@@ -481,9 +490,9 @@ const CreateRecipeScreen = () => {
                         step={10} // Snap to checkpoints
                         value={minimumCarbs}
                         onValueChange={setMinimumCarbs}
-                        minimumTrackTintColor="#1fb28a"
+                        minimumTrackTintColor="#cc3300"
                         maximumTrackTintColor="#d3d3d3"
-                        thumbTintColor="#1a9274"
+                        thumbTintColor="#FF7601"
                     />
 
                 </View>
@@ -497,9 +506,9 @@ const CreateRecipeScreen = () => {
                         step={10} // Snap to checkpoints
                         value={minimumProtein}
                         onValueChange={setMinimumProtein}
-                        minimumTrackTintColor="#1fb28a"
+                        minimumTrackTintColor="#cc3300"
                         maximumTrackTintColor="#d3d3d3"
-                        thumbTintColor="#1a9274"
+                        thumbTintColor="#FF7601"
                     />
 
                 </View>
@@ -513,9 +522,9 @@ const CreateRecipeScreen = () => {
                         step={10} // Snap to checkpoints
                         value={minimumFat}
                         onValueChange={setMinimumFat}
-                        minimumTrackTintColor="#1fb28a"
+                        minimumTrackTintColor="#cc3300"
                         maximumTrackTintColor="#d3d3d3"
-                        thumbTintColor="#1a9274"
+                        thumbTintColor="#FF7601"
                     />
 
                 </View>
@@ -562,9 +571,9 @@ const CreateRecipeScreen = () => {
                         step={1} // Snap to checkpoints
                         value={servings}
                         onValueChange={setServings}
-                        minimumTrackTintColor="#1fb28a"
+                        minimumTrackTintColor="#cc3300"
                         maximumTrackTintColor="#d3d3d3"
-                        thumbTintColor="#1a9274"
+                        thumbTintColor="#FF7601"
                     />
 
                     <View style={{
@@ -603,9 +612,9 @@ const CreateRecipeScreen = () => {
                         step={15} // Snap to checkpoints
                         value={servingTime}
                         onValueChange={setServingTime}
-                        minimumTrackTintColor="#1fb28a"
+                        minimumTrackTintColor="#cc3300"
                         maximumTrackTintColor="#d3d3d3"
-                        thumbTintColor="#1a9274"
+                        thumbTintColor="#FF7601"
                     />
 
                     <View style={{
@@ -625,7 +634,7 @@ const CreateRecipeScreen = () => {
                                 width: 2,
                                 height: 8,
                                 borderRadius: 0,
-                                backgroundColor: '#555',
+                                backgroundColor: '#6c757d',
                                 marginBottom: 2,
                             }} />
                             <Text>{point}</Text>
@@ -648,7 +657,7 @@ const CreateRecipeScreen = () => {
                 {isLoading ? 
                 <ActivityIndicator size="small" color="#FFFFFF" /> : 
                 <View>
-                    <Text style={styles.continueButtonText}>Generate Recipes</Text>
+                    <Text style={styles.continueButtonText}>Ask AI Chef</Text>
                 </View>
                 }
                 
@@ -670,39 +679,38 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#F8F9FA', // Lighter background color
+        backgroundColor: '#f2ede0', // Lighter background color
     },
     headerContainer: {
         marginBottom: 24,
-        marginTop: 40,
+        marginTop: 10,
     },
     header: {
         fontSize: 32, // Larger font size for emphasis
         fontWeight: 'bold', // Bolder for better hierarchy
-        color: '#212529', // Darker text color
-        marginBottom: 8,
+        color: '#333', // Darker text color
     },
     subHeader: {
         fontSize: 18, // Slightly larger for readability
         color: '#6C757D', // Softer color for secondary text
     },
     imageControlsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
         alignItems: 'center',
-        marginBottom: 24,
-        height: 120, // Increased height for a better look
+        height: 300,
+        gap: 12,
     },
     placeholderContainer: {
-        width: '32%', // Adjusted width
-        height: '100%',
+        width: '100%', // Adjusted width
+        height: '70%',
         borderRadius: 16,
         borderWidth: 2,
         borderColor: '#E9ECEF', // Softer border color
         borderStyle: 'dashed',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#f8f9f0',
+        marginBottom: 6,
     },
     placeholderText: {
         marginTop: 8,
@@ -713,13 +721,14 @@ const styles = StyleSheet.create({
         position: 'relative',
         borderRadius: 16,
         overflow: 'hidden',
-        width: '32%', // Adjusted width
-        height: '100%',
+        height: '70%',
+        width: '100%',
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 6,
+        marginBottom: 6,
     },
     image: {
         width: '100%',
@@ -737,23 +746,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     controlButton: {
-        width: "32%", // Adjusted width
-        height: '100%',
-        flexDirection: 'column',
+        width: "50%",
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        padding: 18,
         borderRadius: 16,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 5,
         elevation: 4,
+        gap: 12,
     },
     galleryButton: {
-        backgroundColor: "#6A82FB", // New color
+        backgroundColor: "#f8f9f0", // New color
     },
     cameraButton: {
-        backgroundColor: "#17A2B8", // New color
+        backgroundColor: "#f8f9f0", // New color
     },
     identifyButton: {
         flexDirection: "row",
@@ -762,7 +772,7 @@ const styles = StyleSheet.create({
         padding: 18,
         borderRadius: 16,
         marginBottom: 24,
-        backgroundColor: "#FF6B6B", // New color
+        backgroundColor: "#cc3300", // New color
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -773,20 +783,25 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     buttonText: {
-        color: "#FFFFFF",
+        color: "#F7F7F7",
         fontSize: 18,
-        fontWeight: "bold", // Bolder text
+        fontWeight: "bold", 
+    },
+    buttonTextReversed: {
+        color: "#cc3300",
+        fontSize: 18,
+        fontWeight: "bold", 
     },
     errorText: {
-        color: "#D9534F", // More standard error color
+        color: "#cc3300", 
         marginBottom: 16,
         fontSize: 14,
         textAlign: 'center',
     },
     ingredientsContainer: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20, // More rounded corners
+        backgroundColor: '#f8f9f0',
+        borderRadius: 20, 
         padding: 20,
         marginBottom: 24,
         shadowColor: "#000000",
@@ -807,7 +822,7 @@ const styles = StyleSheet.create({
         color: '#343A40',
     },
     addIngredientButton: {
-        backgroundColor: '#6A82FB',
+        backgroundColor: '#FF7601',
         width: 44,
         height: 44,
         borderRadius: 22,
@@ -818,7 +833,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     userSectionContainer: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#f8f9f0',
         borderRadius: 20,
         padding: 20,
         marginBottom: 24,
@@ -831,15 +846,15 @@ const styles = StyleSheet.create({
     optionContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 12, // More consistent gap
+        gap: 12, 
     },
     optionButton: {
-        paddingVertical: 10, // More vertical padding
-        paddingHorizontal: 16, // More horizontal padding
+        paddingVertical: 10, 
+        paddingHorizontal: 16, 
         borderWidth: 1,
         borderColor: '#CED4DA',
-        borderRadius: 20, // More rounded
-        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        backgroundColor: '#f8f9f0',
     },
     optionButtonSelected: {
         backgroundColor: '#343A40',
@@ -847,7 +862,7 @@ const styles = StyleSheet.create({
     },
     optionButtonText: {
         color: '#495057',
-        fontWeight: '500', // Medium weight for better readability
+        fontWeight: '500', 
     },
     optionButtonTextSelected: {
         color: '#FFFFFF',
@@ -875,7 +890,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         padding: 18,
         borderRadius: 16,
-        backgroundColor: "#28A745", // Success color
+        backgroundColor: "#cc3300", // Success color
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -887,7 +902,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#CED4DA",
     },
     continueButtonText: {
-        color: "#FFFFFF",
+        color: "#F7F7F7",
         fontSize: 18,
         fontWeight: "bold",
     },

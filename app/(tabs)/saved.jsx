@@ -1,16 +1,18 @@
 import { useEffect, useState, useContext } from "react"
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native"
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Pressable, Dimensions } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { BookBookmark, GridFour, List } from "phosphor-react-native"
 import RecipeCard from "../components/recipe-card"
 import { db } from "@/config/firebaseConfig"
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore"
 import { UserDetailContext } from "@/context/UserDetailContext"
+import NutritionInfoBlock from "../components/nutrition-block"
+import { useRouter } from "expo-router"
 export default function SavedScreen() {
-  const { user } = useContext(UserDetailContext)
+  const { user, setRecipe } = useContext(UserDetailContext)
   const [userSavedRecipes, setSavedRecipes] = useState([])
   const [viewMode, setViewMode] = useState("grid")
-  
+  const router = useRouter()
   const fetchSavedRecipes = async () => {
   try {
     const collectionRef = collection(db, 'savedRecipes')
@@ -34,9 +36,7 @@ export default function SavedScreen() {
 }
 
   useEffect(() => {
-    console.log(userSavedRecipes)
     fetchSavedRecipes()
-    
   }, [])
 
 
@@ -53,132 +53,164 @@ export default function SavedScreen() {
     </View>
   )
 
-  return (
-    <SafeAreaView style={styles.container} edges={["right", "left"]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Saved Recipes</Text>
-        <View style={styles.viewToggle}>
-          <TouchableOpacity
-            style={[styles.viewToggleButton, viewMode === "grid" && styles.viewToggleButtonActive]}
-            onPress={() => setViewMode("grid")}
-          >
-            <GridFour size={18} color={viewMode === "grid" ? "#FF6B6B" : "#888"} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.viewToggleButton, viewMode === "list" && styles.viewToggleButtonActive]}
-            onPress={() => setViewMode("list")}
-          >
-            <List size={18} color={viewMode === "list" ? "#FF6B6B" : "#888"} />
-          </TouchableOpacity>
-        </View>
-      </View>
+  const goToRecipePage = (recipe) => {
+    // This function now correctly receives the recipe object
+    if (setRecipe) {
+        setRecipe(recipe);
+    }
+    router.push("/recipes/detail");
+  };
 
-      {userSavedRecipes.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <FlatList
-          data={userSavedRecipes}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <RecipeCard
-              recipe={item}
-              style={viewMode === "grid" ? styles.gridCard : styles.listCard}
-              layout={viewMode}
-              
-            />
-          )}
-          numColumns={viewMode === "grid" ? 2 : 1}
-          key={viewMode} // Force re-render when changing layout
-          contentContainerStyle={styles.recipesList}
-          columnWrapperStyle={viewMode === "grid" ? styles.gridWrapper : undefined}
-        />
-      )}
-    </SafeAreaView>
-  )
-}
+  return (
+    <SafeAreaView style={styles.container}>
+            <Text style={styles.header}>Saved Recipes</Text>
+            {userSavedRecipes.length === 0 ? (
+                <View style={styles.centered}>
+                    <Text style={styles.emptyMessage}>
+                        You have not saved any recipes yet.
+                    </Text>
+                    <TouchableOpacity
+                        style={styles.generateButton}
+                        onPress={() => router.push('/(tabs)/search')}
+                    >
+                        <Text style={styles.generateButtonText}>
+                            Explore recipes
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <FlatList
+                    data={userSavedRecipes}
+                    keyExtractor={item => item.id.toString()}
+                    horizontal={false}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.listContentContainer}
+                    renderItem={({ item }) => (
+                        <Pressable style={styles.recipeItem} onPress={() => goToRecipePage(item)}>
+                            <Text style={styles.recipeTitle} numberOfLines={2}>{item.title}</Text>
+                            <View style={styles.badgeContainer}>
+                                {item.cuisines?.map((cuisine, index) => (
+                                    <View key={index} style={styles.badgeTag}>
+                                        <Text style={styles.badgeText}>{cuisine}</Text>
+                                    </View>
+                                ))}
+                                <View style={styles.badgeTag}>
+                                    <Text style={styles.badgeText}>
+                                        {item.diets?.length > 0 ? item.diets[0] : 'No specific diets'}
+                                    </Text>
+                                </View>
+                                <View style={styles.badgeTag}>
+                                    <Text style={styles.badgeText}>
+                                        {item.readyInMinutes ? `${item.readyInMinutes} min` : 'No time specified'}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            {item.nutrition && item.nutrition.nutrients && (
+                                <View style={styles.nutritionContainer}>
+                                    {item.nutrition.nutrients.slice(0, 4).map((nutrient, index) => (
+                                        <NutritionInfoBlock
+                                            key={index}
+                                            name={nutrient.name}
+                                            amount={nutrient.amount}
+                                            unit={nutrient.unit}
+                                            percentage={nutrient.percentOfDailyNeeds}
+                                        />
+                                    ))}
+                                </View>
+                            )}
+                        </Pressable>
+                    )}
+                />
+            )}
+        </SafeAreaView>
+    );
+};
+
+// Get the width of the screen
+const { width: screenWidth } = Dimensions.get('window');
+// Set the width of the card to be 75% of the screen width
+const cardWidth = screenWidth * 0.9;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 50,
-    backgroundColor: "#F8F9FA",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#FFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#EFEFEF",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  viewToggle: {
-    flexDirection: "row",
-    backgroundColor: "#F0F0F0",
-    borderRadius: 8,
-    padding: 4,
-  },
-  viewToggleButton: {
-    padding: 8,
-    borderRadius: 6,
-  },
-  viewToggleButtonActive: {
-    backgroundColor: "#FFF",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  recipesList: {
-    padding: 16,
-  },
-  gridWrapper: {
-    justifyContent: "space-between",
-  },
-  gridCard: {
-    width: "48%",
-    marginBottom: 16,
-  },
-  listCard: {
-    marginBottom: 16,
-    width: "100%",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 16,
-    marginBottom: 8,
-    color: "#333",
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 24,
-    lineHeight: 20,
-  },
-  exploreButton: {
-    backgroundColor: "#FF6B6B",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  exploreButtonText: {
-    color: "#FFF",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-})
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9f0',
+    },
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin:'auto',
+        padding: 20,
+    },
+    emptyMessage: {
+        fontSize: 18,
+        color: '#6c757d',
+        textAlign: 'center',
+        marginBottom: 24,
+    },
+    generateButton: {
+        backgroundColor: '#cc3300',
+        paddingVertical: 14,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+    },
+    generateButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    header: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        marginTop: 20,
+        marginBottom: 10,
+        paddingHorizontal: 20,
+    },
+    listContentContainer: {
+        paddingHorizontal: 10,
+    },
+    recipeItem: {
+        backgroundColor: '#f2ede0',
+        borderRadius: 16,
+        padding: 20,
+        width: cardWidth,
+        marginHorizontal: 10,
+        marginVertical: 10,
+        elevation: 1,
+    },
+    recipeTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#cc3300',
+        marginBottom: 12,
+    },
+    badgeContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginBottom: 15,
+    },
+    badgeTag: {
+        backgroundColor: '#f8f9f0',
+        borderRadius: 15,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    badgeText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#6c757d',
+    },
+    nutritionContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginTop: 10,
+        padding: 15,
+        backgroundColor: '#f2ede0',
+        borderRadius: 15,
+    }
+});

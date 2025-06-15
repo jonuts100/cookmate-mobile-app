@@ -86,7 +86,7 @@ const CreatedRecipes = () => {
                 <FlatList
                     data={allRecipes}
                     keyExtractor={item => item.id.toString()}
-                    horizontal={true}
+                    horizontal={false}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.listContentContainer}
                     renderItem={({ item }) => (
@@ -136,18 +136,20 @@ export default CreatedRecipes;
 // Get the width of the screen
 const { width: screenWidth } = Dimensions.get('window');
 // Set the width of the card to be 75% of the screen width
-const cardWidth = screenWidth * 0.75;
+const cardWidth = screenWidth * 0.9
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fdfdfd',
+        backgroundColor: '#f8f9f0',
+        
     },
     centered: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
+       
     },
     emptyMessage: {
         fontSize: 18,
@@ -156,15 +158,10 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     generateButton: {
-        backgroundColor: '#FF6B6B',
+        backgroundColor: '#cc3300',
         paddingVertical: 14,
         paddingHorizontal: 30,
         borderRadius: 25,
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
     },
     generateButtonText: {
         color: '#fff',
@@ -182,26 +179,20 @@ const styles = StyleSheet.create({
     listContentContainer: {
         paddingHorizontal: 10,
         paddingVertical: 10,
+        gap: 12
     },
     recipeItem: {
-        backgroundColor: '#fff',
+        backgroundColor: '#f2ede0',
         borderRadius: 20,
         padding: 20,
         width: cardWidth,
         marginHorizontal: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.08,
-        shadowRadius: 10,
-        elevation: 6,
+        elevation: 1,
     },
     recipeTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#333',
+        color: '#cc3300',
         marginBottom: 12,
     },
     badgeContainer: {
@@ -211,7 +202,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     badgeTag: {
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#f8f9f0',
         borderRadius: 15,
         paddingVertical: 6,
         paddingHorizontal: 12,
@@ -219,7 +210,7 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 12,
         fontWeight: '500',
-        color: '#555',
+        color: '#6c757d',
     },
     nutritionContainer: {
         flexDirection: 'row',
@@ -227,7 +218,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 10,
         padding: 15,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#f2ede0',
         borderRadius: 15,
     }
 });
