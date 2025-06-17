@@ -1,7 +1,3 @@
-Here's a refined version of your README with improved grammar, structure, and clarity, while keeping your voice and project personality intact:
-
----
-
 # 🍳 Cookmate Mobile App
 
 ## Overview
@@ -51,8 +47,5 @@ Follow these steps to run the app locally:
    npx expo start
    ```
 
-That's it! The app should open in your browser, and you can preview it using the Expo Go app on your mobile device.
-
----
-
-Let me know if you want to add sections like features, screenshots, or contribution guidelines!
+You can preview the app using the Expo Go app on your mobile device, by scanning the QR Code from your terminal.
+Note: Previewing on web browser doesnt work due to Firebase configurations and Expo limitations.
